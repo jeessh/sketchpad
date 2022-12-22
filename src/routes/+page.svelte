@@ -7,8 +7,16 @@
 	let wrapper: HTMLDivElement;
 	let path: paper.Path;
 	let isDrawing = false;
-	let pan = { x: 0, y: 0 };
-	let zoom = 1;
+
+	let MIN_ZOOM = 0.1;
+	let MAX_ZOOM = 10.0;
+
+	let startX = 0;
+	let startY = 0;
+	let posX = 0;
+	let posY = 0;
+	let gestureStartScale = 1.0;
+	let scale = 1.0;
 
 	onMount(() => {
 		canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
@@ -45,21 +53,19 @@
 	function stopDrawing() {
 		isDrawing = false;
 	}
-    /* 
-        changeZoom: (oldZoom, delta, c, p) ->
-      newZoom = super oldZoom, delta
-      beta = oldZoom / newZoom
-      pc = p.subtract c
-      a = p.subtract(pc.multiply(beta)).subtract c
-      [newZoom, a]
-    */
-   function changeZoom(oldZoom: number, delta: number, center: paper.Point, point: paper.Point): [number, paper.Point] {
-        const newZoom = oldZoom + delta;
-        const beta = oldZoom / newZoom;
-        const pc = point.subtract(center);
-        const a = point.subtract(pc.multiply(beta)).subtract(center);
-        return [newZoom, a];
-    }
+    
+	function changeZoom(
+		oldZoom: number,
+		delta: number,
+		center: paper.Point,
+		point: paper.Point
+	): [number, paper.Point] {
+		const newZoom = oldZoom + delta;
+		const beta = oldZoom / newZoom;
+		const pc = point.subtract(center);
+		const a = point.subtract(pc.multiply(beta)).subtract(center);
+		return [newZoom, a];
+	}
 
 	function changeCenter(oldCenter: paper.Point, deltaX: number, deltaY: number, factor: number) {
 		let offset = new Point(deltaX, deltaY);
@@ -67,37 +73,29 @@
 		return oldCenter.add(offset);
 	}
 
-	/*
-    if event.shiftKey
-        view.center = panAndZoom.changeCenter view.center, event.deltaX, event.deltaY, event.deltaFactor
-        event.preventDefault()
-    else if event.altKey
-        mousePosition = new paper.Point event.offsetX, event.offsetY
-        viewPosition = view.viewToProject(mousePosition)
-        [newZoom, offset] = panAndZoom.changeZoom view.zoom, event.deltaY, view.center, viewPosition
-        view.zoom = newZoom
-        view.center = view.center.add offset
-        event.preventDefault()
-        view.draw()
-    */
 	function handleWheel(event: WheelEvent) {
 		event.preventDefault();
 		event.stopPropagation();
 
-        if (event.altKey) {
-            const mousePosition = new Point(event.offsetX, event.offsetY);
-            const viewPosition = paper.view.viewToProject(mousePosition);
-            const [newZoom, offset] = changeZoom(paper.view.zoom, event.deltaY * 0.01, paper.view.center, viewPosition);
+		if (event.ctrlKey) {
+			const mousePosition = new Point(event.offsetX, event.offsetY);
+			const viewPosition = paper.view.viewToProject(mousePosition);
+			const [newZoom, offset] = changeZoom(
+				paper.view.zoom,
+				-event.deltaY * 0.01,
+				paper.view.center,
+				viewPosition
+			);
 
-            // prevent flipping
-            if (newZoom < 0.1) return;
+			// prevent flipping
+			if (newZoom < MIN_ZOOM || newZoom > MAX_ZOOM) return;
 
-            paper.view.zoom = newZoom;
-            paper.view.center = paper.view.center.add(offset);
-        } else if (event.shiftKey) {
-            // get delta fector
-            paper.view.center = changeCenter(paper.view.center, event.deltaX, event.deltaY, 1.0);
-        }        
+			paper.view.zoom = newZoom;
+			paper.view.center = paper.view.center.add(offset);
+		} else {
+			// get delta fector
+			paper.view.center = changeCenter(paper.view.center, event.deltaX, event.deltaY, 1.0);
+		}
 	}
 </script>
 
@@ -127,20 +125,5 @@
 	.canvas-wrapper {
 		flex: 1;
 		position: relative;
-	}
-	canvas {
-		touch-action: none;
-		-webkit-touch-callout: none;
-		/* iOS Safari */
-		-webkit-user-select: none;
-		/* Safari */
-		-khtml-user-select: none;
-		/* Konqueror HTML */
-		-moz-user-select: none;
-		/* Old versions of Firefox */
-		-ms-user-select: none;
-		/* Internet Explorer/Edge */
-		user-select: none;
-		/* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 	}
 </style>
