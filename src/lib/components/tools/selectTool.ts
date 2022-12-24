@@ -1,13 +1,37 @@
 import paper, { Color, Path, Size } from 'paper';
 import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
+import { selectedItemsStore } from '$lib/stores/layerStateStore';
+import { drawHighlight } from '$lib/util/selection';
 
 let selectRectangle: paper.Path.Rectangle | null = null;
 let selectStartPoint: paper.Point | null = null;
 
 let isShiftKeyPressed = false;
 shiftKeyPressed.subscribe((value) => {
-  isShiftKeyPressed = value;
+	isShiftKeyPressed = value;
 });
+
+let selectedItems = new Set<paper.Item>();
+selectedItemsStore.subscribe((value) => {
+	selectedItems = value;
+});
+
+const selectObject = (item: paper.Item) => {
+	if (!item.data.internal) {
+		selectedItemsStore.set(new Set([...selectedItems, item]))
+		drawHighlight(item);
+	}
+};
+
+const unselectObject = (item: paper.Item) => {
+	if (!item.data.internal) {
+		selectedItemsStore.set(new Set([...selectedItems].filter((i) => i !== item)));
+		if (item.data.highlight) {
+			item.data.highlight.remove();
+			delete item.data.highlight;
+		}
+	}
+};
 
 // create the select tool
 const tool = new paper.Tool();
@@ -17,8 +41,8 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 	selectRectangle.strokeWidth = 1 / paper.view.zoom;
 	selectRectangle.strokeColor = new Color('rgba(20, 143, 236, 1)');
 	selectRectangle.fillColor = new Color('rgba(20, 143, 236, 0.2)');
-	selectRectangle.data = { internal: true };
-	selectRectangle.layer.data = { internal: true };
+	selectRectangle.data.internal = true;
+	selectRectangle.layer.data.internal = true;
 };
 
 // expand the rectangle to the current mouse position
@@ -29,10 +53,17 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 		selectRectangle.strokeWidth = 1 / paper.view.zoom;
 		selectRectangle.strokeColor = new Color('rgba(20, 143, 236, 1)');
 		selectRectangle.fillColor = new Color('rgba(20, 143, 236, 0.2)');
-		selectRectangle.data = { internal: true };
-		selectRectangle.layer.data = { internal: true };
+		selectRectangle.data.internal = true;
+		selectRectangle.layer.data.internal = true;
 	}
 };
+
+// tool.onMouseMove = (event: paper.ToolEvent) => {
+// 	paper.project.activeLayer.selected = false;
+// 	if (event.item && !event.item.data.internal) {
+// 		event.item.selected = true;
+// 	}
+// }
 
 // select all items that collide with the rectangle, highlighting in a blue border
 tool.onMouseUp = (event: paper.ToolEvent) => {
@@ -51,13 +82,12 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 					.filter((item) => !item.data.internal)
 			: paper.project.getItems({
 					overlapping: selectRectangle.bounds,
-					class: paper.Path,
 					match: (item: paper.Item) => {
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						const rectangleInside = item.bounds.contains(selectRectangle!.bounds);
 						return !item.data.internal && !rectangleInside;
 					}
-				});
+			  });
 
 		if (items.length === 0 || !isShiftKeyPressed) {
 			clearSelected();
@@ -65,7 +95,7 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 
 		// create bounding box
 		items.forEach((item) => {
-			item.selected = true;
+			selectObject(item);
 		});
 
 		// remove the rectangle
@@ -74,13 +104,9 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 };
 
 const clearSelected = () => {
-	paper.project.selectedItems.forEach(function (o) {
-		// console.log("Unselect Item", o.name);
-		// o.data.highlight.visible = false;
-		o.selected = false;
-		// o.layer.selected = false;
+	selectedItems.forEach((layer) => {
+		unselectObject(layer);
 	});
-	paper.project.activeLayer.selected = false;
 };
 
 export default tool;

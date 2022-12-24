@@ -1,10 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import paper, { Point, Size } from 'paper';
+	import paper, { Point, Size, Group } from 'paper';
 	import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
+	import { selectedItemsStore } from '$lib/stores/layerStateStore';
+	import { drawHighlight } from '$lib/util/selection';
 
 	let canvas: HTMLCanvasElement;
 	let wrapper: HTMLDivElement;
+	let selectedItems = new Set<paper.Item>();
+	selectedItemsStore.subscribe((value) => {
+		selectedItems = value;
+	});
 
 	const MIN_ZOOM = 0.1;
 	const MAX_ZOOM = 10.0;
@@ -19,6 +25,11 @@
 		const beta = oldZoom / newZoom;
 		const pc = point.subtract(center);
 		const a = point.subtract(pc.multiply(beta)).subtract(center);
+
+		selectedItems.forEach((item) => {
+			drawHighlight(item);
+		});
+
 		return [newZoom, a];
 	}
 
