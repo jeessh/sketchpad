@@ -14,7 +14,7 @@ const tool = new paper.Tool();
 tool.onMouseDown = (event: paper.ToolEvent) => {
 	selectStartPoint = event.point;
 	selectRectangle = new Path.Rectangle(event.point, new Size(0, 0));
-	selectRectangle.strokeWidth = 1;
+	selectRectangle.strokeWidth = 1 / paper.view.zoom;
 	selectRectangle.strokeColor = new Color('rgba(20, 143, 236, 1)');
 	selectRectangle.fillColor = new Color('rgba(20, 143, 236, 0.2)');
 	selectRectangle.data = { internal: true };
@@ -26,7 +26,7 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 	if (selectRectangle && selectStartPoint) {
 		selectRectangle.remove();
 		selectRectangle = new Path.Rectangle(selectStartPoint, event.point);
-		selectRectangle.strokeWidth = 1;
+		selectRectangle.strokeWidth = 1 / paper.view.zoom;
 		selectRectangle.strokeColor = new Color('rgba(20, 143, 236, 1)');
 		selectRectangle.fillColor = new Color('rgba(20, 143, 236, 0.2)');
 		selectRectangle.data = { internal: true };
@@ -53,7 +53,9 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 					overlapping: selectRectangle.bounds,
 					class: paper.Path,
 					match: (item: paper.Item) => {
-						return !item.data.internal;
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						const rectangleInside = item.bounds.contains(selectRectangle!.bounds);
+						return !item.data.internal && !rectangleInside;
 					}
 				});
 
