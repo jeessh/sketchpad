@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { pencilTool, selectTool } from './tools';
+    import { selectTool, pencilTool } from './tools';
     import paper from 'paper';
     
     let currentTool: paper.Tool;
@@ -30,6 +30,7 @@
     <button on:click={activateSelect}>Move</button>
     <button on:click={activatePencil}>Pencil</button>
     <button on:click={clear}>Clear</button>
+    <!-- <SelectTool /> -->
   </div>
   
   <style>

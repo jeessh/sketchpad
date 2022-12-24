@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import paper, { Point, Size } from 'paper';
+	import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
 
 	let canvas: HTMLCanvasElement;
 	let wrapper: HTMLDivElement;
@@ -32,6 +33,18 @@
 		paper.setup(canvas);
 		setCanvasSize();
 		window.addEventListener('resize', setCanvasSize);
+
+		window.addEventListener('keydown', (event) => {
+			if (event.key === 'Shift') {
+				shiftKeyPressed.set(true);
+			}
+		});
+
+		window.addEventListener('keyup', (event) => {
+			if (event.key === 'Shift') {
+				shiftKeyPressed.set(false);
+			}
+		});
 	});
 
 	function setCanvasSize() {

@@ -1,19 +1,12 @@
 import paper, { Color, Path, Size } from 'paper';
+import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
 
 let selectRectangle: paper.Path.Rectangle | null = null;
 let selectStartPoint: paper.Point | null = null;
-let shiftKeyPressed = false;
 
-window.addEventListener('keydown', (event) => {
-	if (event.key === 'Shift') {
-		shiftKeyPressed = true;
-	}
-});
-
-window.addEventListener('keyup', (event) => {
-	if (event.key === 'Shift') {
-		shiftKeyPressed = false;
-	}
+let isShiftKeyPressed = false;
+shiftKeyPressed.subscribe((value) => {
+  isShiftKeyPressed = value;
 });
 
 // create the select tool
@@ -62,9 +55,9 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 					match: (item: paper.Item) => {
 						return !item.data.internal;
 					}
-			  });
+				});
 
-		if (items.length === 0 || !shiftKeyPressed) {
+		if (items.length === 0 || !isShiftKeyPressed) {
 			clearSelected();
 		}
 
