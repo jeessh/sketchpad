@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import paper, { Point, Size, Group } from 'paper';
+	import paper, { Point, Size } from 'paper';
 	import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
-	import { canvasRef } from '$lib/stores/globalStateStore';
+	import { setCurrentTool, getCurrentTool, type TTool } from '$lib/stores/globalStateStore';
+	import { canvasRef } from '$lib/stores/globalRefsStateStore';
 	import { drawHighlight } from '$lib/util/selection';
 
 	let canvas: HTMLCanvasElement;
@@ -33,6 +34,7 @@
 		return oldCenter.add(offset);
 	}
 
+	let prevTool: TTool | null = null;
 	onMount(() => {
 		canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
 		canvasRef.set(canvas);
@@ -43,12 +45,21 @@
 		window.addEventListener('keydown', (event) => {
 			if (event.key === 'Shift') {
 				shiftKeyPressed.set(true);
+			} else if (event.code === 'Space') {
+				// change to pan tool
+				prevTool = getCurrentTool();
+				setCurrentTool('pan');
 			}
 		});
 
 		window.addEventListener('keyup', (event) => {
 			if (event.key === 'Shift') {
 				shiftKeyPressed.set(false);
+			} else if (event.code === 'Space') {
+				// change back to previous tool
+				if (prevTool) {
+					setCurrentTool(prevTool);
+				}
 			}
 		});
 	});

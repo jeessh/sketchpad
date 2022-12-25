@@ -1,33 +1,23 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { selectTool, pencilTool, panTool } from './tools';
-    import { setCursor } from '$lib/util/cursor';
+    import { setCurrentTool } from '$lib/stores/globalStateStore';
     import paper from 'paper';
-    
-    let currentTool: paper.Tool;
     
     onMount(() => {
       // set initial tool
-      currentTool = selectTool;
-      currentTool.activate();
+      setCurrentTool('select');
     });
     
     function activatePencil() {
-      currentTool = pencilTool;
-      setCursor('crosshair');
-      currentTool.activate();
+      setCurrentTool('pencil');
     }
     
     function activateSelect() {
-      currentTool = selectTool;
-      setCursor('default')
-      currentTool.activate();
+      setCurrentTool('select');
     }
 
     function activatePan() {
-      currentTool = panTool;
-      setCursor('grab');
-      currentTool.activate();
+      setCurrentTool('pan');
     }
     
     function clear() {

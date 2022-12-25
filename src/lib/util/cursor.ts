@@ -1,4 +1,4 @@
-import { canvasRef } from '$lib/stores/globalStateStore';
+import { canvasRef } from '$lib/stores/globalRefsStateStore';
 
 let canvas: HTMLCanvasElement | null = null;
 canvasRef.subscribe((value) => {
