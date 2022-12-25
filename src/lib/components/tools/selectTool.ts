@@ -69,10 +69,21 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 
 		let items: paper.Item[] = [];
 		items = paper.project.getItems({
-			overlapping: selectRectangle?.bounds,
 			match: (item: paper.Item) => {
 				return !item.data.internal;
 			},
+		}).filter((item) => {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			if (item.className === 'Path' && item.intersects(selectRectangle!)) {
+				return true;
+			} else if (item.className === 'Group' || item.className === 'CompoundPath') {
+				return item.children.some((child) => {
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					return child.intersects(selectRectangle!);
+				});
+			} else {
+				return false;
+			}
 		});
 
 		// if shift key is pressed, add to current selection, otherwise replace selection
