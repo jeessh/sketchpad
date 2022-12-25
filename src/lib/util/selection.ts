@@ -1,13 +1,20 @@
 import paper, { Color, Path, Group } from 'paper';
+import { selectedItemsStore } from '$lib/stores/layerStateStore';
 
-const makeCorners = (o: paper.Item) => {
+let highlight: paper.Group | null = null;
+let selectedItems = new Set<paper.Item>();
+selectedItemsStore.subscribe((value) => {
+	selectedItems = value;
+});
+
+const makeCorners = (b: paper.Rectangle) => {
 	const s = 7 / paper.view.zoom;
 	const g = new Group();
 	const corners = [
-		o.strokeBounds.topLeft,
-		o.strokeBounds.topRight,
-		o.strokeBounds.bottomLeft,
-		o.strokeBounds.bottomRight
+		b.topLeft,
+		b.topRight,
+		b.bottomLeft,
+		b.bottomRight
 	];
 	corners.forEach(function (corner) {
 		const h = new Path.Rectangle({
@@ -24,23 +31,37 @@ const makeCorners = (o: paper.Item) => {
 	return g;
 };
 
-const makeBounds = (o: paper.Item) => {
+const makeBounds = (b: paper.Rectangle) => {
 	const r = new Path.Rectangle({
-		rectangle: o.strokeBounds,
+		rectangle: b,
 		strokeWidth: 1 / paper.view.zoom
 	});
 	r.data.internal = true;
 	return r;
 };
 
-export const drawHighlight = (item: paper.Item) => {
-	item.data.highlight?.remove();
+export const drawHighlight = () => {
+	highlight?.remove();
 
-	item.data.highlight = new Group({
-		children: [makeBounds(item), makeCorners(item)],
+	if (selectedItems.size === 0) {
+		return;
+	}
+	
+	// get bounding box that contains all selected items
+	let bounds = selectedItems.values().next().value.bounds;
+	selectedItems.forEach((item) => {
+		bounds = bounds.unite(item.bounds);
+	});
+
+	highlight = new Group({
+		children: [makeBounds(bounds), makeCorners(bounds)],
 		strokeColor: 'rgba(20, 143, 236, 1)',
 		visible: true
 	});
 
-	item.data.highlight.data.internal = true;
+	highlight.data.internal = true;
 };
+
+export const clearHighlight = () => {
+	highlight?.remove();
+}
