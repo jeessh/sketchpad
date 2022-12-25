@@ -38,6 +38,7 @@ const unselectObject = (item: paper.Item) => {
 
 // create the select tool
 const tool = new paper.Tool();
+let originalSelectedItems: Set<paper.Item>;
 tool.onMouseDown = (event: paper.ToolEvent) => {
 	// if inside selection bounds
 	if (selectionBounds && selectionBounds.contains(event.point)) {	
@@ -46,6 +47,7 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 	}
 
 	selectStartPoint = event.point;
+	originalSelectedItems = new Set(selectedItems);
 };
 
 // expand the rectangle to the current mouse position
@@ -64,6 +66,32 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 		selectRectangle.fillColor = new Color('rgba(20, 143, 236, 0.2)');
 		selectRectangle.data.internal = true;
 		selectRectangle.layer.data.internal = true;
+
+		let items: paper.Item[] = [];
+		items = paper.project.getItems({
+			overlapping: selectRectangle?.bounds,
+			match: (item: paper.Item) => {
+				return !item.data.internal;
+			},
+		});
+
+		// if shift key is pressed, add to current selection, otherwise replace selection
+		if (isShiftKeyPressed) {
+			items.forEach((item) => {
+				if (originalSelectedItems.has(item)) {
+					unselectObject(item);
+				} else {
+					selectObject(item);
+				}
+			});
+		} else {
+			originalSelectedItems.forEach((item) => {
+				unselectObject(item);
+			});
+			items.forEach((item) => {
+				selectObject(item);
+			});
+		}
 	}
 };
 
@@ -94,34 +122,24 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 		if (items.length > 0) {
 			items = [items[0]];
 		}
-	} else {
-		items = paper.project.getItems({
-			overlapping: selectRectangle?.bounds,
-			match: (item: paper.Item) => {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				const rectangleInside = item.bounds.contains(selectRectangle!.bounds);
-				return !item.data.internal && !rectangleInside;
+		if (!isShiftKeyPressed && !moving) {
+			selectedItemsStore.set(new Set());
+			clearHighlight();
+		}
+	
+		if (moving) {
+			moving = false;
+		}
+	
+		// create bounding box
+		items.forEach((item) => {
+			if (isShiftKeyPressed && selectedItems.has(item)) {
+				unselectObject(item);
+			} else {
+				selectObject(item);
 			}
 		});
 	}
-
-	if (!isShiftKeyPressed && !moving) {
-		selectedItemsStore.set(new Set());
-		clearHighlight();
-	}
-
-	if (moving) {
-		moving = false;
-	}
-
-	// create bounding box
-	items.forEach((item) => {
-		if (isShiftKeyPressed && selectedItems.has(item)) {
-			unselectObject(item);
-		} else {
-			selectObject(item);
-		}
-	});
 
 	// remove the rectangle
 	selectRectangle?.remove();
