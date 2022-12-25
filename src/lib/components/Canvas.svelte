@@ -49,6 +49,10 @@
 				// change to pan tool
 				prevTool = getCurrentTool();
 				setCurrentTool('pan');
+			} else if (event.key == 'v') {
+				setCurrentTool('select');
+			} else if (event.key == 'p') {
+				setCurrentTool('pencil');
 			}
 		});
 
