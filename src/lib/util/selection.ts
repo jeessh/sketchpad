@@ -1,5 +1,5 @@
 import paper, { Color, Path, Group } from 'paper';
-import { selectedItemsStore } from '$lib/stores/layerStateStore';
+import { selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
 
 let highlight: paper.Group | null = null;
 let selectedItems = new Set<paper.Item>();
@@ -55,6 +55,8 @@ export const drawHighlight = () => {
 		bounds = bounds.unite(item.bounds);
 	});
 
+	selectionBoundsStore.set(bounds);
+
 	highlight = new Group({
 		children: [makeBounds(bounds), makeCorners(bounds)],
 		strokeColor: 'rgba(20, 143, 236, 1)',
@@ -66,4 +68,5 @@ export const drawHighlight = () => {
 
 export const clearHighlight = () => {
 	highlight?.remove();
+	selectionBoundsStore.set(undefined);
 }

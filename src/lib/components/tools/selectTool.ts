@@ -1,6 +1,6 @@
 import paper, { Color, Path } from 'paper';
 import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
-import { selectedItemsStore } from '$lib/stores/layerStateStore';
+import { selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
 import { drawHighlight, clearHighlight } from '$lib/util/selection';
 
 let selectRectangle: paper.Path.Rectangle | null = null;
@@ -15,6 +15,11 @@ shiftKeyPressed.subscribe((value) => {
 let selectedItems = new Set<paper.Item>();
 selectedItemsStore.subscribe((value) => {
 	selectedItems = value;
+});
+
+let selectionBounds: paper.Rectangle | undefined;
+selectionBoundsStore.subscribe((value) => {
+	selectionBounds = value;
 });
 
 const selectObject = (item: paper.Item) => {
@@ -34,20 +39,10 @@ const unselectObject = (item: paper.Item) => {
 // create the select tool
 const tool = new paper.Tool();
 tool.onMouseDown = (event: paper.ToolEvent) => {
-	// perform hit test on all items
-	const hitResult = paper.project.hitTest(event.point, {
-		fill: true,
-		stroke: true,
-		segments: true,
-		tolerance: 5
-	});
-	
-	if (hitResult) {
-		const item = hitResult.item;
-		if (item.data?.moveable) {
-			moving = true;
-			return;
-		}
+	// if inside selection bounds
+	if (selectionBounds && selectionBounds.contains(event.point)) {	
+		moving = true;
+		return;
 	}
 
 	selectStartPoint = event.point;
@@ -81,11 +76,6 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 
 // select all items that collide with the rectangle, highlighting in a blue border
 tool.onMouseUp = (event: paper.ToolEvent) => {
-	if (moving) {
-		moving = false;
-		return;
-	}
-	
 	let items: paper.Item[] = [];
 
 	// single click
@@ -115,9 +105,13 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 		});
 	}
 
-	if (!isShiftKeyPressed) {
+	if (!isShiftKeyPressed && !moving) {
 		selectedItemsStore.set(new Set());
 		clearHighlight();
+	}
+
+	if (moving) {
+		moving = false;
 	}
 
 	// create bounding box
