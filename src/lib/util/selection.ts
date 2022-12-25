@@ -36,7 +36,9 @@ const makeBounds = (b: paper.Rectangle) => {
 		rectangle: b,
 		strokeWidth: 1 / paper.view.zoom
 	});
+	r.fillColor = new Color('rgba(255, 255, 255, 0.001)');
 	r.data.internal = true;
+	r.data.moveable = true;
 	return r;
 };
 
