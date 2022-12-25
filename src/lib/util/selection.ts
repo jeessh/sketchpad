@@ -46,6 +46,7 @@ export const drawHighlight = () => {
 	highlight?.remove();
 
 	if (selectedItems.size === 0) {
+		selectionBoundsStore.set(undefined);
 		return;
 	}
 	
@@ -65,8 +66,3 @@ export const drawHighlight = () => {
 
 	highlight.data.internal = true;
 };
-
-export const clearHighlight = () => {
-	highlight?.remove();
-	selectionBoundsStore.set(undefined);
-}

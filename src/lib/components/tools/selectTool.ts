@@ -1,7 +1,7 @@
 import paper, { Color, Path } from 'paper';
 import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
 import { selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
-import { drawHighlight, clearHighlight } from '$lib/util/selection';
+import { drawHighlight } from '$lib/util/selection';
 
 let selectRectangle: paper.Path.Rectangle | null = null;
 let selectStartPoint: paper.Point | null = null;
@@ -124,7 +124,7 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 		}
 		if (!isShiftKeyPressed && !moving) {
 			selectedItemsStore.set(new Set());
-			clearHighlight();
+			drawHighlight();
 		}
 	
 		if (moving) {

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import paper, { Point, Size, Group } from 'paper';
 	import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
+	import { canvasRef } from '$lib/stores/globalStateStore';
 	import { drawHighlight } from '$lib/util/selection';
 
 	let canvas: HTMLCanvasElement;
@@ -34,6 +35,7 @@
 
 	onMount(() => {
 		canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
+		canvasRef.set(canvas);
 		paper.setup(canvas);
 		setCanvasSize();
 		window.addEventListener('resize', setCanvasSize);
@@ -62,7 +64,7 @@
 		event.preventDefault();
 		event.stopPropagation();
 
-		if (event.ctrlKey) {
+		if (event.ctrlKey || event.metaKey) {
 			const mousePosition = new Point(event.offsetX, event.offsetY);
 			const viewPosition = paper.view.viewToProject(mousePosition);
 			const [newZoom, offset] = changeZoom(
