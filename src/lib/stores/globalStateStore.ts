@@ -22,10 +22,13 @@ const tools: Record<TTool, { tool: paper.Tool; cursor: string }> = {
 /* Current Tool */
 export const currentTool = writable<TTool>('select');
 export const setCurrentTool = (target: TTool) => {
+	const prevTool = get(currentTool);
 	const { tool, cursor } = tools[target];
 	currentTool.set(target);
     tool.activate();
 	setCursor(cursor);
+
+	return prevTool;
 };
 
 export const getCurrentTool = () => {

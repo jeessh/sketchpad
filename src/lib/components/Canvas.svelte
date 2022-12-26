@@ -35,6 +35,8 @@
 	}
 
 	let prevTool: TTool | null = null;
+	let isSpaceKeyPressed = false;
+
 	onMount(() => {
 		canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
 		canvasRef.set(canvas);
@@ -45,11 +47,13 @@
 		window.addEventListener('keydown', (event) => {
 			if (event.key === 'Shift') {
 				shiftKeyPressed.set(true);
-			} else if (event.code === 'Space') {
-				// change to pan tool
-				prevTool = getCurrentTool();
-				setCurrentTool('pan');
-			} else if (event.key == 'v') {
+			} else if (event.key === ' ') {
+				if (!isSpaceKeyPressed) {
+					// change to pan tool
+					prevTool = setCurrentTool('pan');
+					isSpaceKeyPressed = true;
+				}
+			} else if (event.key == 'v' || event.key == 'a') {
 				setCurrentTool('select');
 			} else if (event.key == 'p') {
 				setCurrentTool('pencil');
@@ -59,7 +63,8 @@
 		window.addEventListener('keyup', (event) => {
 			if (event.key === 'Shift') {
 				shiftKeyPressed.set(false);
-			} else if (event.code === 'Space') {
+			} else if (event.key === ' ') {
+				isSpaceKeyPressed = false;
 				// change back to previous tool
 				if (prevTool) {
 					setCurrentTool(prevTool);
