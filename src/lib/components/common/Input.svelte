@@ -2,12 +2,18 @@
 	// @ts-nocheck
 
 	let inputProps;
+	let labelWidth = '';  // default value for label width
 	$: ({ label, ...inputProps } = $$props);
+
+	$: if (label) {
+		const str = label.toString();
+		labelWidth = 'width: ' + str.length + 'ch';  // calculate label width based on number of characters in label
+	}
 </script>
 
 <div class="input-group">
     {#if label}
-        <label for={inputProps.id}>{label}</label>
+        <label for={inputProps.id} style={labelWidth}>{label}</label>
     {/if}
 	<input {...inputProps} />
 </div>
@@ -18,6 +24,10 @@
         align-items: center;
         // flex-direction: column;
         gap: 8px;
+    }
+
+    label {
+        color: #b3b3b3;
     }
 
 	input[type='text'] {

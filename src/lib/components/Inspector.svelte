@@ -12,19 +12,28 @@
         <div class="section">
             <div class="title">Position and Size</div>
             <div class="content">
-                <div class="row">
-                    <div class="bg-red-100">
-                        <Input label="X" type="text" />
+                <div class="flex gap-4">
+                    <div class="w-1/2">
+                        <Input label="X" type="text" class="w-full" />
                     </div>
-                    <div class="col-1-2">b</div>
-                    <!-- <Input label="Y" type="text" /> -->
+                    <div class="w-1/2">
+                        <Input label="Y" type="text" class="w-full" />
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-1/2">
+                        <Input label="W" type="text" class="w-full" />
+                    </div>
+                    <div class="w-1/2">
+                        <Input label="H" type="text" class="w-full" />
+                    </div>
                 </div>
             </div>
         </div>
         <div class="section">
             <div class="title">Fill</div>
             <div class="content">
-                <div class="row">
+                <div class="flex">
                     <ColorInput bind:color={color} setColor={(newColor) => color = newColor} />
                     <VisibilityToggle bind:visible={fillVisible} setVisible={(visible) => {
                         fillVisible = visible
@@ -40,10 +49,16 @@
 		background-color: #232323;
 		color: white;
 		height: 100%;
-		width: 200px;
+		width: 250px;
 		border: 1px solid #303437;
 		padding: 16px;
 	}
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
 
     .sections {
         display: flex;
@@ -54,14 +69,4 @@
 	.title {
 		margin-bottom: 8px;
 	}
-
-	.row {
-		display: flex;
-        flex-basis: 0;
-		gap: 8px;
-	}
-
-    .col-1-2 {
-        width: 50%;
-    }
 </style>
