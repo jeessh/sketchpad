@@ -73,13 +73,13 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 				return !item.data.internal;
 			},
 		}).filter((item) => {
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			if (item.className === 'Path' && item.intersects(selectRectangle!)) {
-				return true;
+			if (item.className === 'Path') {
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				return item.intersects(selectRectangle!) || item.isInside(selectRectangle!.bounds);
 			} else if (item.className === 'Group' || item.className === 'CompoundPath') {
 				return item.children.some((child) => {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					return child.intersects(selectRectangle!);
+					return child.intersects(selectRectangle!) || child.isInside(selectRectangle!.bounds);
 				});
 			} else {
 				return false;
