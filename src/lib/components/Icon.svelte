@@ -1,5 +1,5 @@
 <script>
-	import { CursorIcon, HandIcon, PencilIcon } from '$lib/icons';
+	import { CursorIcon, HandIcon, PencilIcon, EyeOpenIcon, EyeClosedIcon } from '$lib/icons';
 
 	export let name = '';
 	export let width = '1rem';
@@ -19,11 +19,27 @@
 			box: 15,
 			name: 'pencil',
 			svg: PencilIcon
+		},
+		{
+			box: 15,
+			name: 'eye-open',
+			svg: EyeOpenIcon
+		},
+		{
+			box: 15,
+			name: 'eye-closed',
+			svg: EyeClosedIcon
 		}
 	];
-	let displayIcon = icons.find((e) => e.name === name);
+	$: displayIcon = icons.find((e) => e.name === name);
 </script>
 
 <svg class={$$props.class} {width} {height} viewBox="0 0 {displayIcon?.box} {displayIcon?.box}"
 	>{@html displayIcon?.svg}</svg
 >
+
+<style>
+	svg {
+		display: block;
+	}
+</style>

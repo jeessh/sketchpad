@@ -8,6 +8,7 @@ tool.onMouseDown = () => {
 };
 
 tool.onMouseDrag = (event: paper.ToolEvent) => {
+    if (!event.downPoint) return;
 	const offset = event.downPoint.subtract(event.point);
 	paper.view.center = paper.view.center.add(offset);
 };

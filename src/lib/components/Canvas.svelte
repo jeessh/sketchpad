@@ -112,6 +112,7 @@
 
 <style>
     #wrapper {
+		height: 100%;
         flex: 1;
 		position: relative; 
     }

@@ -1,0 +1,43 @@
+<script lang="ts">
+	import Input from "./Input.svelte";
+
+    export let color: string;
+    export let setColor: (arg0: string) => any;
+</script>
+
+<div class="wrapper">
+    <input type="color" value={color} on:input={(e) => setColor(e.target?.value)} />
+    <Input type="text" value={color} />
+</div>
+
+<style>
+    .wrapper {
+        position: relative;
+    }
+    input[type='color'] {
+        position: absolute;
+        left: 0;
+        -webkit-appearance: none;
+        background: none;
+        border-radius: 2px;
+        border-width: 0;
+        width: 34px;
+        padding: 6px;
+        height: 100%;
+    }
+
+    input[type='color']::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    input[type='color']::-webkit-color-swatch {
+        border-radius: 4px;
+        border-width: 0;
+    }
+
+    .wrapper :global(input[type="text"]) {
+        padding: 8px 8px;
+        padding-left: 35px;
+        width: calc(100% - 43px);
+    }
+</style>

@@ -157,4 +157,12 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 	selectRectangle = null;
 };
 
+// when switching to pan tool, remove the selection rectangle
+tool.onKeyDown = (event: paper.KeyEvent) => {
+	if (event.key === 'space') {
+		selectRectangle?.remove();
+		selectRectangle = null;
+	}
+}
+
 export default tool;
