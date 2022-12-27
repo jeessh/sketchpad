@@ -106,12 +106,27 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 	}
 };
 
-// tool.onMouseMove = (event: paper.ToolEvent) => {
-// 	paper.project.activeLayer.selected = false;
-// 	if (event.item && !event.item.data.internal) {
-// 		event.item.selected = true;
-// 	}
-// }
+tool.onMouseMove = (event: paper.ToolEvent) => {
+	// do a hit test on the mouse position, if over a corner, change the cursor
+	const hitResult = paper.project.hitTest(event.point, {
+		fill: true,
+		stroke: true,
+		segments: true,
+		class: paper.Path,
+		tolerance: 5,
+	});
+
+	if (hitResult) {
+		const { item } = hitResult;
+		if (item.data?.cursor) {
+			paper.view.element.style.cursor = item.data?.cursor;
+		} else {
+			paper.view.element.style.cursor = 'default';
+		}
+	} else {
+		paper.view.element.style.cursor = 'default';
+	}
+}
 
 // select all items that collide with the rectangle, highlighting in a blue border
 tool.onMouseUp = (event: paper.ToolEvent) => {

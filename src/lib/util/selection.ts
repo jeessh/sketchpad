@@ -10,13 +10,9 @@ selectedItemsStore.subscribe((value) => {
 const makeCorners = (b: paper.Rectangle) => {
 	const s = 7 / paper.view.zoom;
 	const g = new Group();
-	const corners = [
-		b.topLeft,
-		b.topRight,
-		b.bottomLeft,
-		b.bottomRight
-	];
-	corners.forEach(function (corner) {
+	const corners = [b.topLeft, b.topRight, b.bottomLeft, b.bottomRight];
+	const cursors = ['nwse-resize', 'nesw-resize', 'nesw-resize', 'nwse-resize'];
+	corners.forEach(function (corner, i) {
 		const h = new Path.Rectangle({
 			center: corner,
 			size: s,
@@ -24,6 +20,7 @@ const makeCorners = (b: paper.Rectangle) => {
 		});
 		h.fillColor = new Color('white');
 		h.data.internal = true;
+		h.data.cursor = cursors[i];
 		g.addChild(h);
 	});
 
@@ -32,14 +29,48 @@ const makeCorners = (b: paper.Rectangle) => {
 };
 
 const makeBounds = (b: paper.Rectangle) => {
-	const r = new Path.Rectangle({
-		rectangle: b,
-		strokeWidth: 1 / paper.view.zoom
+	const x = b.x;
+	const y = b.y;
+	const width = b.width;
+	const height = b.height;
+	const strokeWidth = 1 / paper.view.zoom;
+
+	const g = new Group();
+	const lines = [
+		[
+			[x, y],
+			[x + width, y]
+		],
+		[
+			[x + width, y],
+			[x + width, y + height]
+		],
+		[
+			[x + width, y + height],
+			[x, y + height]
+		],
+		[
+			[x, y + height],
+			[x, y]
+		]
+	];
+
+	const cursors = ['ns-resize', 'ew-resize', 'ns-resize', 'ew-resize'];
+
+	lines.forEach(function (line, i) {
+		const [from, to] = line;
+		const l = new Path.Line({
+			from,
+			to,
+			strokeWidth
+		});
+		l.data.internal = true;
+		l.data.cursor = cursors[i];
+		g.addChild(l);
 	});
-	r.fillColor = new Color('rgba(255, 255, 255, 0.001)');
-	r.data.internal = true;
-	r.data.moveable = true;
-	return r;
+
+	g.data.internal = true;
+	return g;
 };
 
 export const drawHighlight = () => {
@@ -49,7 +80,7 @@ export const drawHighlight = () => {
 		selectionBoundsStore.set(undefined);
 		return;
 	}
-	
+
 	// get bounding box that contains all selected items
 	let bounds = selectedItems.values().next().value.bounds;
 	selectedItems.forEach((item) => {
