@@ -1,47 +1,145 @@
-<script type="ts">
+<script lang="ts">
+	import paper from 'paper';
 	import ColorInput from './common/ColorInput.svelte';
 	import Input from './common/Input.svelte';
 	import VisibilityToggle from './common/VisibilityToggle.svelte';
+	import { selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
+	import { drawHighlight } from '$lib/util/selection';
+
+	let bounds: paper.Rectangle | undefined;
+	selectionBoundsStore.subscribe((value) => {
+		bounds = value;
+	});
+
+	let selectedItems = new Set<paper.Item>();
+	selectedItemsStore.subscribe((value) => {
+		selectedItems = value;
+	});
+
+	const updateX = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		const x = parseFloat(target.value);
+		if (isNaN(x)) return;
+		selectedItems.forEach((item) => {
+			item.position.x = x + item.bounds.width / 2;
+		});
+
+		drawHighlight();
+	};
+
+	const updateY = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		const y = parseFloat(target.value);
+		if (isNaN(y)) return;
+		selectedItems.forEach((item) => {
+			item.position.y = y + item.bounds.height / 2;
+		});
+
+		drawHighlight();
+	};
+
+	const updateWidth = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		const width = parseFloat(target.value);
+		if (isNaN(width)) return;
+		selectedItems.forEach((item) => {
+			item.bounds.width = width;
+		});
+
+		drawHighlight();
+	};
+
+	const updateHeight = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		const height = parseFloat(target.value);
+		if (isNaN(height)) return;
+		selectedItems.forEach((item) => {
+			item.bounds.height = height;
+		});
+
+		drawHighlight();
+	};
+
+	// on key down, if the user presses enter, blur the input
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Enter') {
+			const target = e.target as HTMLInputElement;
+			target.blur();
+		}
+	};
 
 	let fillVisible = true;
-    let color = '#000000';
+	let color = '#000000';
 </script>
 
 <div class="inspector">
-    <div class="sections">
-        <div class="section">
-            <div class="title">Position and Size</div>
-            <div class="content">
-                <div class="flex gap-4">
-                    <div class="w-1/2">
-                        <Input label="X" type="text" class="w-full" />
-                    </div>
-                    <div class="w-1/2">
-                        <Input label="Y" type="text" class="w-full" />
-                    </div>
-                </div>
-                <div class="flex gap-4">
-                    <div class="w-1/2">
-                        <Input label="W" type="text" class="w-full" />
-                    </div>
-                    <div class="w-1/2">
-                        <Input label="H" type="text" class="w-full" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="section">
-            <div class="title">Fill</div>
-            <div class="content">
-                <div class="flex">
-                    <ColorInput bind:color={color} setColor={(newColor) => color = newColor} />
-                    <VisibilityToggle bind:visible={fillVisible} setVisible={(visible) => {
-                        fillVisible = visible
-                    }} />
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="sections">
+		{#if bounds}
+			<div class="section">
+				<div class="title">Transform</div>
+				<div class="content">
+					<div class="flex gap-4">
+						<div class="w-1/2">
+							<Input
+								label="X"
+								type="text"
+								class="w-full"
+								value={bounds?.x}
+								onChange={updateX}
+								onKeyDown={handleKeyDown}
+							/>
+						</div>
+						<div class="w-1/2">
+							<Input
+								label="Y"
+								type="text"
+								class="w-full"
+								value={bounds?.y}
+								onChange={updateY}
+								onKeyDown={handleKeyDown}
+							/>
+						</div>
+					</div>
+					<div class="flex gap-4">
+						<div class="w-1/2">
+							<Input
+								label="W"
+								type="text"
+								class="w-full"
+								value={bounds?.width}
+								onChange={updateWidth}
+								onKeyDown={handleKeyDown}
+							/>
+						</div>
+						<div class="w-1/2">
+							<Input
+								label="H"
+								type="text"
+								class="w-full"
+								value={bounds?.height}
+								onChange={updateHeight}
+								onKeyDown={handleKeyDown}
+							/>
+						</div>
+					</div>
+				</div>
+			</div>
+		{/if}
+		<div class="section">
+			<div class="title">Fill</div>
+			<div class="content">
+				<div class="flex">
+					<ColorInput bind:color setColor={(newColor) => (color = newColor)} />
+					<VisibilityToggle
+						bind:visible={fillVisible}
+						setVisible={(visible) => {
+							fillVisible = visible;
+						}}
+					/>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <style>
@@ -54,17 +152,17 @@
 		padding: 16px;
 	}
 
-    .content {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
+	.content {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
 
-    .sections {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-    }
+	.sections {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+	}
 
 	.title {
 		margin-bottom: 8px;
