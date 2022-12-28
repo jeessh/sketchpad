@@ -10,17 +10,43 @@ selectedItemsStore.subscribe((value) => {
 const makeCorners = (b: paper.Rectangle) => {
 	const s = 7 / paper.view.zoom;
 	const g = new Group();
-	const corners = [b.topLeft, b.topRight, b.bottomLeft, b.bottomRight];
-	const cursors = ['nwse-resize', 'nesw-resize', 'nesw-resize', 'nwse-resize'];
-	corners.forEach(function (corner, i) {
+	const corners = [
+		{
+			type: 'topLeft',
+			bounds: b.topLeft,
+			cursor: 'nwse-resize',
+			resize: 'both',
+		},
+		{
+			type: 'topRight',
+			bounds: b.topRight,
+			cursor: 'nesw-resize',
+			resize: 'both',
+		},
+		{
+			type: 'bottomLeft',
+			bounds: b.bottomLeft,
+			cursor: 'nesw-resize',
+			resize: 'both',
+		},
+		{
+			type: 'bottomRight',
+			bounds: b.bottomRight,
+			cursor: 'nwse-resize',
+			resize: 'both',
+		},
+	]
+	corners.forEach(function (corner) {
 		const h = new Path.Rectangle({
-			center: corner,
+			center: corner.bounds,
 			size: s,
 			strokeWidth: 1 / paper.view.zoom
 		});
 		h.fillColor = new Color('white');
 		h.data.internal = true;
-		h.data.cursor = cursors[i];
+		h.data.cursor = corner.cursor;
+		h.data.resize = corner.resize;
+		h.data.type = corner.type;
 		g.addChild(h);
 	});
 
@@ -37,35 +63,46 @@ const makeBounds = (b: paper.Rectangle) => {
 
 	const g = new Group();
 	const lines = [
-		[
-			[x, y],
-			[x + width, y]
-		],
-		[
-			[x + width, y],
-			[x + width, y + height]
-		],
-		[
-			[x + width, y + height],
-			[x, y + height]
-		],
-		[
-			[x, y + height],
-			[x, y]
-		]
+		{
+			type: 'top',
+			from: [x, y],
+			to: [x + width, y],
+			cursor: 'ns-resize',
+			resize: 'height',
+		},
+		{
+			type: 'right',
+			from: [x + width, y],
+			to: [x + width, y + height],
+			cursor: 'ew-resize',
+			resize: 'width',
+		},
+		{
+			type: 'bottom',
+			from: [x + width, y + height],
+			to: [x, y + height],
+			cursor: 'ns-resize',
+			resize: 'height',
+		},
+		{
+			type: 'left',
+			from: [x, y + height],
+			to: [x, y],
+			cursor: 'ew-resize',
+			resize: 'width',
+		},
 	];
 
-	const cursors = ['ns-resize', 'ew-resize', 'ns-resize', 'ew-resize'];
-
-	lines.forEach(function (line, i) {
-		const [from, to] = line;
+	lines.forEach(function (line) {
 		const l = new Path.Line({
-			from,
-			to,
+			from: line.from,
+			to: line.to,
 			strokeWidth
 		});
 		l.data.internal = true;
-		l.data.cursor = cursors[i];
+		l.data.cursor = line.cursor;
+		l.data.resize = line.resize;
+		l.data.type = line.type;
 		g.addChild(l);
 	});
 

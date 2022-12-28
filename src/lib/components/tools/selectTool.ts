@@ -38,7 +38,34 @@ const unselectObject = (item: paper.Item) => {
 
 // create the select tool
 const tool = new paper.Tool();
+tool.onMouseMove = (event: paper.ToolEvent) => {
+	// do a hit test on the mouse position, if over a corner, change the cursor
+	const hitResult = paper.project.hitTest(event.point, {
+		fill: true,
+		stroke: true,
+		segments: true,
+		class: paper.Path,
+		tolerance: 5,
+	});
+
+	if (hitResult) {
+		const { item } = hitResult;
+		if (item.data?.cursor) {
+			paper.view.element.style.cursor = item.data?.cursor;
+		} else {
+			paper.view.element.style.cursor = 'default';
+		}
+	} else {
+		paper.view.element.style.cursor = 'default';
+	}
+}
+
 let originalSelectedItems: Set<paper.Item>;
+type ScaleType = 'horizontal' | 'vertical' | 'both';
+let scaleAbout: paper.Point | null = null;
+let scaleStartPoint: paper.Point | null = null;
+let originalScaleBounds: paper.Rectangle | undefined;
+let scaleType: ScaleType | null = null;
 tool.onMouseDown = (event: paper.ToolEvent) => {
 	// if inside selection bounds
 	if (selectionBounds && selectionBounds.contains(event.point)) {	
@@ -48,11 +75,106 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 
 	selectStartPoint = event.point;
 	originalSelectedItems = new Set(selectedItems);
+
+	const hitResult = paper.project.hitTest(event.point, {
+		fill: true,
+		stroke: true,
+		segments: true,
+		class: paper.Path,
+		tolerance: 5,
+	});
+	
+	if (hitResult) {
+		const { item } = hitResult;
+		if (item.data?.resize && item.data?.type && selectionBounds) {
+			const type = item.data.type;
+
+			if (type === 'topLeft') {
+				scaleAbout = selectionBounds.bottomRight;
+			} else if (type === 'topRight') {
+				scaleAbout = selectionBounds.bottomLeft;
+			} else if (type === 'bottomLeft') {
+				scaleAbout = selectionBounds.topRight;
+			} else if (type === 'bottomRight') {
+				scaleAbout = selectionBounds.topLeft;
+			} else if (type === 'top') {
+				scaleAbout = selectionBounds.bottomCenter;
+			} else if (type === 'bottom') {
+				scaleAbout = selectionBounds.topCenter;
+			} else if (type === 'left') {
+				scaleAbout = selectionBounds.rightCenter;
+			} else if (type === 'right') {
+				scaleAbout = selectionBounds.leftCenter;
+			}
+
+			scaleType = item.data.resize;
+			scaleStartPoint = event.point;
+			originalScaleBounds = selectionBounds;
+			return;
+		}
+	}
 };
 
 // expand the rectangle to the current mouse position
+let prevScale = { x: 1, y: 1 };
 tool.onMouseDrag = (event: paper.ToolEvent) => {
-	if (moving) {
+	if (scaleStartPoint && scaleAbout && scaleType && originalScaleBounds && selectionBounds) {
+		let { x, y } = event.point.subtract(scaleStartPoint);
+		const { width: origWidth, height: origHeight } = originalScaleBounds;
+		const { width: curWidth, height: curHeight } = selectionBounds;
+
+		let width = origWidth;
+		let height = origHeight;
+	
+		// determine the correct scale factor based scale reference pt
+		if (scaleAbout.x === originalScaleBounds.rightCenter.x) {
+		  x = -x;
+		}
+
+		if (scaleAbout.y === originalScaleBounds.bottomCenter.y) {
+		  y = -y;
+		}
+
+		if (scaleType === 'horizontal') {
+		  width = origWidth + x;
+		} else if (scaleType === 'vertical') {
+		  height = origHeight + y;
+		} else if (scaleType === 'both') {
+		  width = origWidth + x;
+		  height = origHeight + y;
+		}
+	
+		if (width === 0) {
+			width = 1;
+		}
+		if (height === 0) {
+			height = 1;
+		}
+	
+		const scale = {
+		  x: width / curWidth,
+		  y: height / curHeight,
+		};
+
+		const adjustedScale = {
+			x: scale.x,
+			y: scale.y,
+		}
+		
+		selectedItems.forEach((item) => {
+			item.scale(Math.abs(adjustedScale.x), Math.abs(adjustedScale.y), scaleAbout!);
+
+			if (Math.sign(scale.x) !== Math.sign(prevScale.x)) {
+				item.scale(-1, 1, scaleAbout!);
+			}
+			if (Math.sign(scale.y) !== Math.sign(prevScale.y)) {
+				item.scale(1, -1, scaleAbout!);
+			}
+		});
+		
+		prevScale = scale;
+		drawHighlight();
+	} else if (moving) {
 		const { x, y } = event.delta;
 		selectedItems.forEach((item) => {
 			item.position = item.position.add(new paper.Point(x, y));
@@ -106,28 +228,6 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 	}
 };
 
-tool.onMouseMove = (event: paper.ToolEvent) => {
-	// do a hit test on the mouse position, if over a corner, change the cursor
-	const hitResult = paper.project.hitTest(event.point, {
-		fill: true,
-		stroke: true,
-		segments: true,
-		class: paper.Path,
-		tolerance: 5,
-	});
-
-	if (hitResult) {
-		const { item } = hitResult;
-		if (item.data?.cursor) {
-			paper.view.element.style.cursor = item.data?.cursor;
-		} else {
-			paper.view.element.style.cursor = 'default';
-		}
-	} else {
-		paper.view.element.style.cursor = 'default';
-	}
-}
-
 // select all items that collide with the rectangle, highlighting in a blue border
 tool.onMouseUp = (event: paper.ToolEvent) => {
 	let items: paper.Item[] = [];
@@ -170,6 +270,11 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 	// remove the rectangle
 	selectRectangle?.remove();
 	selectRectangle = null;
+
+	scaleAbout = null;
+	scaleStartPoint = null;
+	originalScaleBounds = undefined;
+	scaleType = null;
 };
 
 // when switching to pan tool, remove the selection rectangle
