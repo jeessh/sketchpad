@@ -61,7 +61,7 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 }
 
 let originalSelectedItems: Set<paper.Item>;
-type ScaleType = 'horizontal' | 'vertical' | 'both';
+type ScaleType = 'height' | 'width' | 'both';
 let scaleAbout: paper.Point | null = null;
 let scaleStartPoint: paper.Point | null = null;
 let originalScaleBounds: paper.Rectangle | undefined;
@@ -83,6 +83,8 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 		class: paper.Path,
 		tolerance: 5,
 	});
+
+	console.log(hitResult)
 	
 	if (hitResult) {
 		const { item } = hitResult;
@@ -135,15 +137,15 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 		  y = -y;
 		}
 
-		if (scaleType === 'horizontal') {
+		if (scaleType === 'width') {
 		  width = origWidth + x;
-		} else if (scaleType === 'vertical') {
+		} else if (scaleType === 'height') {
 		  height = origHeight + y;
 		} else if (scaleType === 'both') {
 		  width = origWidth + x;
 		  height = origHeight + y;
 		}
-	
+
 		if (width === 0) {
 			width = 1;
 		}

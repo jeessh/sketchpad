@@ -97,7 +97,7 @@ const makeBounds = (b: paper.Rectangle) => {
 		const l = new Path.Line({
 			from: line.from,
 			to: line.to,
-			strokeWidth
+			strokeWidth,
 		});
 		l.data.internal = true;
 		l.data.cursor = line.cursor;
