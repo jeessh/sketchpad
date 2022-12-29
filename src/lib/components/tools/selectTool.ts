@@ -64,15 +64,6 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 let originalSelectedItems: Set<paper.Item>;
 let scaler: Scaler | null = null;
 tool.onMouseDown = (event: paper.ToolEvent) => {
-	// if inside selection bounds
-	if (selectionBounds && selectionBounds.contains(event.point)) {	
-		moving = true;
-		return;
-	}
-
-	selectStartPoint = event.point;
-	originalSelectedItems = new Set(selectedItems);
-
 	const hitResult = paper.project.hitTest(event.point, {
 		fill: true,
 		stroke: true,
@@ -96,6 +87,15 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 			return;
 		}
 	}
+
+	// if inside selection bounds
+	if (selectionBounds && selectionBounds.contains(event.point)) {	
+		moving = true;
+		return;
+	}
+
+	selectStartPoint = event.point;
+	originalSelectedItems = new Set(selectedItems);
 };
 
 // expand the rectangle to the current mouse position
