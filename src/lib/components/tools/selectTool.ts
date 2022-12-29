@@ -1,12 +1,18 @@
 import paper, { Color, Path } from 'paper';
 import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
-import { highlightedItemStore, selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
+import {
+	highlightedItemStore,
+	selectedItemsStore,
+	selectionBoundsStore
+} from '$lib/stores/layerStateStore';
 import { drawHighlight } from '$lib/util/selection';
 import { Scaler } from '$lib/util/scale';
+import { Rectangle } from 'paper/dist/paper-core';
 
 let selectRectangle: paper.Path.Rectangle | null = null;
 let selectStartPoint: paper.Point | null = null;
 let moving = false;
+let moved = false;
 
 let isShiftKeyPressed = false;
 shiftKeyPressed.subscribe((value) => {
@@ -42,6 +48,11 @@ const unselectObject = (item: paper.Item) => {
 	}
 };
 
+const unselectAll = () => {
+	selectedItemsStore.set(new Set());
+	drawHighlight();
+};
+
 const highlightItem = (item: paper.Item) => {
 	highlightedItemStore.set(item);
 };
@@ -58,7 +69,7 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 		fill: true,
 		stroke: true,
 		segments: true,
-		tolerance: 5,
+		tolerance: 5
 	});
 
 	if (hitResult) {
@@ -75,7 +86,7 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 		unhighlightItem();
 		paper.view.element.style.cursor = 'default';
 	}
-}
+};
 
 let originalSelectedItems: Set<paper.Item>;
 let scaler: Scaler | null = null;
@@ -84,31 +95,45 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 		fill: true,
 		stroke: true,
 		segments: true,
-		tolerance: 5,
+		tolerance: 5
 	});
 
 	if (hitResult) {
 		const { item } = hitResult;
+
 		if (item.data?.resize && item.data?.type && selectionBounds) {
 			const type = item.data.type;
 
 			scaler = new Scaler({
 				scaleStartPoint: event.point,
-				scaleType: item.data.resize,
-			})
+				scaleType: item.data.resize
+			});
 
 			scaler.setScaleAboutPoint(type, selectionBounds);
 
 			return;
-		} else if (!selectionBounds) {
+		}
+
+		if (!moved) {
+			unselectAll();
+		}
+
+		if (!selectionBounds) {
 			// if nothing is selected, select the item
 			selectObject(item);
 		}
 	}
 
 	// if inside selection bounds
-	if (selectionBounds && selectionBounds.contains(event.point)) {	
+	// const debugRect = selectionBounds?.expand(5);
+	// draw debugRect
+	// new Path.Rectangle(debugRect!).fillColor = new Color(1, 0, 0, 0.2);
+	const tolerance = 5 / paper.view.zoom;
+
+	if (selectionBounds && selectionBounds.expand(tolerance).contains(event.point)) {
+		console.log('moving');
 		moving = true;
+		moved = false;
 		return;
 	}
 
@@ -125,6 +150,7 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 		selectedItems.forEach((item) => {
 			item.position = item.position.add(new paper.Point(x, y));
 		});
+		moved = true;
 		drawHighlight();
 	} else if (selectStartPoint) {
 		selectRectangle?.remove();
@@ -136,23 +162,25 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 		selectRectangle.layer.data.internal = true;
 
 		let items: paper.Item[] = [];
-		items = paper.project.getItems({
-			match: (item: paper.Item) => {
-				return !item.data.internal;
-			},
-		}).filter((item) => {
-			if (item.className === 'Path') {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				return item.intersects(selectRectangle!) || item.isInside(selectRectangle!.bounds);
-			} else if (item.className === 'Group' || item.className === 'CompoundPath') {
-				return item.children.some((child) => {
+		items = paper.project
+			.getItems({
+				match: (item: paper.Item) => {
+					return !item.data.internal;
+				}
+			})
+			.filter((item) => {
+				if (item.className === 'Path') {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					return child.intersects(selectRectangle!) || child.isInside(selectRectangle!.bounds);
-				});
-			} else {
-				return false;
-			}
-		});
+					return item.intersects(selectRectangle!) || item.isInside(selectRectangle!.bounds);
+				} else if (item.className === 'Group' || item.className === 'CompoundPath') {
+					return item.children.some((child) => {
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						return child.intersects(selectRectangle!) || child.isInside(selectRectangle!.bounds);
+					});
+				} else {
+					return false;
+				}
+			});
 
 		// if shift key is pressed, add to current selection, otherwise replace selection
 		if (isShiftKeyPressed) {
@@ -179,13 +207,13 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 	let items: paper.Item[] = [];
 
 	// single click
-	if (!selectRectangle && !scaler) {
+	if (!selectRectangle && !moved && !scaler) {
 		items = paper.project
 			.hitTestAll(event.point, {
 				fill: true,
 				stroke: true,
 				segments: true,
-				tolerance: 5,
+				tolerance: 5
 			})
 			.map((hit) => hit.item)
 			.filter((item) => !item.data.internal);
@@ -194,15 +222,15 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 		if (items.length > 0) {
 			items = [items[0]];
 		}
-		if (!isShiftKeyPressed && !moving) {
+		if (!isShiftKeyPressed) {
 			selectedItemsStore.set(new Set());
 			drawHighlight();
 		}
-	
+
 		if (moving) {
 			moving = false;
 		}
-	
+
 		// create bounding box
 		items.forEach((item) => {
 			if (isShiftKeyPressed && selectedItems.has(item)) {
@@ -217,6 +245,7 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 	selectRectangle?.remove();
 	selectRectangle = null;
 
+	moved = false;
 	scaler = null;
 };
 
@@ -225,7 +254,16 @@ tool.onKeyDown = (event: paper.KeyEvent) => {
 	if (event.key === 'space') {
 		selectRectangle?.remove();
 		selectRectangle = null;
+	} else if (event.key === 'escape') {
+		unselectAll();
+	} else if (event.key === 'backspace') {
+		selectedItems.forEach((item) => {
+			item.remove();
+		});
+		selectedItemsStore.set(new Set());
+		drawHighlight();
 	}
-}
+
+};
 
 export default tool;
