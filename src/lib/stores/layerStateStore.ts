@@ -3,6 +3,7 @@ import paper, { Color } from 'paper';
 
 export const selectedItemsStore = writable(new Set<paper.Item>());
 export const selectionBoundsStore = writable<paper.Rectangle | undefined>();
+export const highlightedItemStore = writable<paper.Item | undefined>();
 
 // dict of old styles
 const oldStyles: Record<string, Partial<paper.Style>> = {};
@@ -34,4 +35,33 @@ selectedItemsStore.subscribe((value) => {
             strokeColor: new Color('rgba(20, 143, 236, 1)'),
         };
     });
+});
+
+// subscribe to highlighted item, whenever it changes add blue border to highlighted item
+let highlightedItem: paper.Item | undefined;
+highlightedItemStore.subscribe((value) => {
+    // remove blue border from previous highlighted item
+    if (highlightedItem) {
+        highlightedItem.style = {
+            ...highlightedItem.style,
+            ...oldStyles[highlightedItem.id],
+        }
+    }
+
+    highlightedItem = value;
+
+    // add blue border
+    if (highlightedItem) {
+        // set old style
+        if (!oldStyles[highlightedItem.id]) {
+            oldStyles[highlightedItem.id] = {
+                strokeColor: highlightedItem.strokeColor,
+            }
+        }
+
+        highlightedItem.style = {
+            ...highlightedItem.style,
+            strokeColor: new Color('rgba(20, 143, 236, 1)'),
+        };
+    }
 });

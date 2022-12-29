@@ -1,6 +1,6 @@
 import paper, { Color, Path } from 'paper';
 import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
-import { selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
+import { highlightedItemStore, selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
 import { drawHighlight } from '$lib/util/selection';
 import { Scaler } from '$lib/util/scale';
 
@@ -23,6 +23,11 @@ selectionBoundsStore.subscribe((value) => {
 	selectionBounds = value;
 });
 
+let highlightedItem: paper.Item | undefined;
+highlightedItemStore.subscribe((value) => {
+	highlightedItem = value;
+});
+
 const selectObject = (item: paper.Item) => {
 	if (!item.data.internal) {
 		selectedItemsStore.set(new Set([...selectedItems, item]));
@@ -37,6 +42,14 @@ const unselectObject = (item: paper.Item) => {
 	}
 };
 
+const highlightItem = (item: paper.Item) => {
+	highlightedItemStore.set(item);
+};
+
+const unhighlightItem = () => {
+	highlightedItemStore.set(undefined);
+};
+
 // create the select tool
 const tool = new paper.Tool();
 tool.onMouseMove = (event: paper.ToolEvent) => {
@@ -45,7 +58,6 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 		fill: true,
 		stroke: true,
 		segments: true,
-		class: paper.Path,
 		tolerance: 5,
 	});
 
@@ -54,9 +66,13 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 		if (item.data?.cursor) {
 			paper.view.element.style.cursor = item.data?.cursor;
 		} else {
+			if (!selectionBounds) {
+				highlightItem(item);
+			}
 			paper.view.element.style.cursor = 'default';
 		}
 	} else {
+		unhighlightItem();
 		paper.view.element.style.cursor = 'default';
 	}
 }
@@ -68,7 +84,6 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 		fill: true,
 		stroke: true,
 		segments: true,
-		class: paper.Path,
 		tolerance: 5,
 	});
 
@@ -85,6 +100,9 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 			scaler.setScaleAboutPoint(type, selectionBounds);
 
 			return;
+		} else if (!selectionBounds) {
+			// if nothing is selected, select the item
+			selectObject(item);
 		}
 	}
 
