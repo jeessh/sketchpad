@@ -1,4 +1,6 @@
-import paper, { Color, Path, Point, Size } from 'paper';
+import { setCurrentTool } from '$lib/stores/globalStateStore';
+import { selectObject } from '$lib/stores/layerStateStore';
+import paper, { Path } from 'paper';
 
 let path: paper.Path | undefined;
 let isDrawing = false;
@@ -26,6 +28,10 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 
 tool.onMouseUp = () => {
 	isDrawing = false;
+    if (path) {
+        selectObject(path);
+        setCurrentTool('select');
+    }
     path = undefined;
 };
 

@@ -1,5 +1,4 @@
-import { selectedItemsStore, selectionBoundsStore } from "$lib/stores/layerStateStore";
-import { drawHighlight } from "$lib/util/selection";
+import { drawHighlight, selectedItemsStore, selectionBoundsStore } from "$lib/stores/layerStateStore";
 
 type ScaleType = 'height' | 'width' | 'both';
 

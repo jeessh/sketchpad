@@ -1,13 +1,16 @@
 import paper, { Color, Path } from 'paper';
 import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
 import {
-	highlightedItemStore,
+	drawHighlight,
+	highlightItem,
 	selectedItemsStore,
-	selectionBoundsStore
+	selectionBoundsStore,
+	selectObject,
+	unhighlightItem,
+	unselectAll,
+	unselectObject
 } from '$lib/stores/layerStateStore';
-import { drawHighlight } from '$lib/util/selection';
 import { Scaler } from '$lib/util/scale';
-import { Rectangle } from 'paper/dist/paper-core';
 
 let selectRectangle: paper.Path.Rectangle | null = null;
 let selectStartPoint: paper.Point | null = null;
@@ -28,38 +31,6 @@ let selectionBounds: paper.Rectangle | undefined;
 selectionBoundsStore.subscribe((value) => {
 	selectionBounds = value;
 });
-
-let highlightedItem: paper.Item | undefined;
-highlightedItemStore.subscribe((value) => {
-	highlightedItem = value;
-});
-
-const selectObject = (item: paper.Item) => {
-	if (!item.data.internal) {
-		selectedItemsStore.set(new Set([...selectedItems, item]));
-		drawHighlight();
-	}
-};
-
-const unselectObject = (item: paper.Item) => {
-	if (!item.data.internal) {
-		selectedItemsStore.set(new Set([...selectedItems].filter((i) => i !== item)));
-		drawHighlight();
-	}
-};
-
-const unselectAll = () => {
-	selectedItemsStore.set(new Set());
-	drawHighlight();
-};
-
-const highlightItem = (item: paper.Item) => {
-	highlightedItemStore.set(item);
-};
-
-const unhighlightItem = () => {
-	highlightedItemStore.set(undefined);
-};
 
 // create the select tool
 const tool = new paper.Tool();

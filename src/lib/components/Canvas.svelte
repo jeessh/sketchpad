@@ -4,7 +4,7 @@
 	import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
 	import { setCurrentTool, getCurrentTool, type TTool } from '$lib/stores/globalStateStore';
 	import { canvasRef } from '$lib/stores/globalRefsStateStore';
-	import { drawHighlight } from '$lib/util/selection';
+	import { drawHighlight } from '$lib/stores/layerStateStore';
 
 	let canvas: HTMLCanvasElement;
 	let wrapper: HTMLDivElement;
@@ -53,10 +53,12 @@
 					prevTool = setCurrentTool('pan');
 					isSpaceKeyPressed = true;
 				}
-			} else if (event.key == 'v' || event.key == 'a') {
+			} else if (event.key === 'v' || event.key === 'a') {
 				setCurrentTool('select');
-			} else if (event.key == 'p') {
+			} else if (event.key === 'p') {
 				setCurrentTool('pencil');
+			} else if (event.key === 'r') {
+				setCurrentTool('rectangle');
 			}
 		});
 
