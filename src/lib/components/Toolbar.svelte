@@ -21,6 +21,9 @@
     <div class="tool" class:active={activeTool === 'pan'} on:click={() => setCurrentTool('pan')}>
         <Icon height="15" width="15" name="hand" class="block" />
     </div>
+    <div class="tool" class:active={activeTool === 'rectangle'} on:click={() => setCurrentTool('rectangle')}>
+        <Icon height="15" width="15" name="square" class="block" />
+    </div>
     <div class="tool" class:active={activeTool === 'pencil'} on:click={() => setCurrentTool('pencil')}>
         <Icon height="15" width="15" name="pencil" class="block" />
     </div>

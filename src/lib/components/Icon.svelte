@@ -1,5 +1,12 @@
 <script>
-	import { CursorIcon, HandIcon, PencilIcon, EyeOpenIcon, EyeClosedIcon } from '$lib/icons';
+	import {
+		CursorIcon,
+		HandIcon,
+		PencilIcon,
+		EyeOpenIcon,
+		EyeClosedIcon,
+		SquareIcon
+	} from '$lib/icons';
 
 	export let name = '';
 	export let width = '1rem';
@@ -29,6 +36,11 @@
 			box: 15,
 			name: 'eye-closed',
 			svg: EyeClosedIcon
+		},
+		{
+			box: 15,
+			name: 'square',
+			svg: SquareIcon
 		}
 	];
 	$: displayIcon = icons.find((e) => e.name === name);

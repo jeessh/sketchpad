@@ -66,7 +66,7 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 		if (item.data?.cursor) {
 			paper.view.element.style.cursor = item.data?.cursor;
 		} else {
-			if (!selectionBounds) {
+			if (!selectionBounds || !selectionBounds.contains(event.point)) {
 				highlightItem(item);
 			}
 			paper.view.element.style.cursor = 'default';

@@ -1,22 +1,26 @@
 import { get, writable } from 'svelte/store';
-import { selectTool, pencilTool, panTool } from '$lib/components/tools';
+import { selectTool, pencilTool, panTool, rectangleTool } from '$lib/components/tools';
 import { setCursor } from '$lib/util/cursor';
 
 // define tools
-export type TTool = 'select' | 'pencil' | 'pan';
+export type TTool = 'select' | 'pan' | 'rectangle' | 'pencil';
 const tools: Record<TTool, { tool: paper.Tool; cursor: string }> = {
 	select: {
 		tool: selectTool,
+		cursor: 'default'
+	},
+	pan: {
+		tool: panTool,
+		cursor: 'grab'
+	},
+	rectangle: {
+		tool: rectangleTool,
 		cursor: 'default'
 	},
 	pencil: {
 		tool: pencilTool,
 		cursor: 'crosshair'
 	},
-	pan: {
-		tool: panTool,
-		cursor: 'grab'
-	}
 };
 
 /* Current Tool */

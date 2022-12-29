@@ -41,7 +41,7 @@ selectedItemsStore.subscribe((value) => {
 let highlightedItem: paper.Item | undefined;
 highlightedItemStore.subscribe((value) => {
     // remove blue border from previous highlighted item
-    if (highlightedItem) {
+    if (highlightedItem && !selectedItems.has(highlightedItem)) {
         highlightedItem.style = {
             ...highlightedItem.style,
             ...oldStyles[highlightedItem.id],
