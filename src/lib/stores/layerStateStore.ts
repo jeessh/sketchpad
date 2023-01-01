@@ -33,7 +33,7 @@ selectedItemsStore.subscribe((value) => {
 });
 
 export const selectObject = (item: paper.Item) => {
-	if (!item.data.internal) {
+	if (!item.data.internal && !selectedItems.has(item)) {
 		selectedItemsStore.set(new Set([...selectedItems, item]));
 		drawHighlight();
 	}
