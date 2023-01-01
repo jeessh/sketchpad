@@ -3,8 +3,21 @@
 	import ColorInput from './common/ColorInput.svelte';
 	import Input from './common/Input.svelte';
 	import VisibilityToggle from './common/VisibilityToggle.svelte';
-	import { drawHighlight, selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
+	import {
+		drawHighlight,
+		selectedItemsStore,
+		selectionBoundsStore
+	} from '$lib/stores/layerStateStore';
 	import OpacityInput from './common/OpacityInput.svelte';
+	import { getFill, getStroke } from '$lib/util/properties';
+
+	let fillVisible = true;
+	let fillColor: paper.Color[] = [];
+	let fillOpacity = 1.0;
+
+	let strokeVisible = true;
+	let strokeColor: paper.Color[] = [];
+	let strokeOpacity = 1.0;
 
 	let bounds: paper.Rectangle | undefined;
 	selectionBoundsStore.subscribe((value) => {
@@ -14,7 +27,23 @@
 	let selectedItems = new Set<paper.Item>();
 	selectedItemsStore.subscribe((value) => {
 		selectedItems = value;
+		fillColor = getFill(Array.from(value));
+		strokeColor = getStroke(Array.from(value));
 	});
+
+	const setFillColor = (color: paper.Color) => {
+		selectedItems.forEach((item) => {
+			item.fillColor = color;
+		});
+		fillColor = getFill(Array.from(selectedItems));
+	};
+
+	const setStrokeColor = (color: paper.Color) => {
+		selectedItems.forEach((item) => {
+			item.strokeColor = color;
+		});
+		strokeColor = getStroke(Array.from(selectedItems));
+	};
 
 	const updateX = (e: Event) => {
 		const target = e.target as HTMLInputElement;
@@ -67,17 +96,9 @@
 			target.blur();
 		}
 	};
-
-	let fillVisible = true;
-	let fillColor = '#000000';
-	let fillOpacity = 1.0;
-
-	let strokeVisible = true;
-	let strokeColor = '#000000';
-	let strokeOpacity = 1.0;
 </script>
 
-<div class="inspector">
+<div class="inspector" on:keydown={(e) => e.stopPropagation()}>
 	<div class="sections">
 		{#if bounds}
 			<div class="section">
@@ -135,9 +156,12 @@
 			<div class="content">
 				<div class="flex">
 					<div class="flex min-w-0">
-						<ColorInput bind:color={fillColor} setColor={(newColor) => (fillColor = newColor)} />
-						<div class="h-full w-px" style="background-color: #303437;"/>
-						<OpacityInput bind:opacity={fillOpacity} setOpacity={(newOpacity) => fillOpacity = newOpacity} />
+						<ColorInput bind:color={fillColor} setColor={setFillColor} />
+						<div class="h-full w-px" style="background-color: #303437;" />
+						<OpacityInput
+							bind:opacity={fillOpacity}
+							setOpacity={(newOpacity) => (fillOpacity = newOpacity)}
+						/>
 					</div>
 					<div class="ml-1 h-full">
 						<VisibilityToggle
@@ -155,9 +179,12 @@
 			<div class="content">
 				<div class="flex">
 					<div class="flex min-w-0">
-						<ColorInput bind:color={strokeColor} setColor={(newColor) => (strokeColor = newColor)} />
-						<div class="h-full w-px" style="background-color: #303437;"/>
-						<OpacityInput bind:opacity={strokeOpacity} setOpacity={(newOpacity) => strokeOpacity = newOpacity} />
+						<ColorInput bind:color={strokeColor} setColor={setStrokeColor} />
+						<div class="h-full w-px" style="background-color: #303437;" />
+						<OpacityInput
+							bind:opacity={strokeOpacity}
+							setOpacity={(newOpacity) => (strokeOpacity = newOpacity)}
+						/>
 					</div>
 					<div class="ml-1 h-full">
 						<VisibilityToggle

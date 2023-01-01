@@ -102,7 +102,6 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 	const tolerance = 5 / paper.view.zoom;
 
 	if (selectionBounds && selectionBounds.expand(tolerance).contains(event.point)) {
-		console.log('moving');
 		moving = true;
 		moved = false;
 		return;
