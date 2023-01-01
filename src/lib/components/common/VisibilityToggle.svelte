@@ -1,5 +1,4 @@
 <script>
-    import { afterUpdate } from "svelte";
 	import Icon from "$lib/components/Icon.svelte";
 
 

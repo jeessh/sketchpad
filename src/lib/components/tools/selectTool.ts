@@ -85,7 +85,7 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 			return;
 		}
 
-		if (!moved) {
+		if (!selectionBounds && !moved) {
 			unselectAll();
 		}
 
@@ -216,6 +216,7 @@ tool.onMouseUp = (event: paper.ToolEvent) => {
 	selectRectangle?.remove();
 	selectRectangle = null;
 
+	moving = false;
 	moved = false;
 	scaler = null;
 };

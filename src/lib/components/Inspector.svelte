@@ -3,8 +3,8 @@
 	import ColorInput from './common/ColorInput.svelte';
 	import Input from './common/Input.svelte';
 	import VisibilityToggle from './common/VisibilityToggle.svelte';
-	import { selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
-	import { drawHighlight } from '$lib/util/selection';
+	import { drawHighlight, selectedItemsStore, selectionBoundsStore } from '$lib/stores/layerStateStore';
+	import OpacityInput from './common/OpacityInput.svelte';
 
 	let bounds: paper.Rectangle | undefined;
 	selectionBoundsStore.subscribe((value) => {
@@ -69,7 +69,12 @@
 	};
 
 	let fillVisible = true;
-	let color = '#000000';
+	let fillColor = '#000000';
+	let fillOpacity = 1.0;
+
+	let strokeVisible = true;
+	let strokeColor = '#000000';
+	let strokeOpacity = 1.0;
 </script>
 
 <div class="inspector">
@@ -129,11 +134,33 @@
 			<div class="title">Fill</div>
 			<div class="content">
 				<div class="flex">
-					<ColorInput bind:color setColor={(newColor) => (color = newColor)} />
+					<div class="flex min-w-0">
+						<ColorInput bind:color={fillColor} setColor={(newColor) => (fillColor = newColor)} />
+						<div class="bg-gray-700 h-full w-px"/>
+						<OpacityInput bind:opacity={fillOpacity} />
+					</div>
 					<VisibilityToggle
 						bind:visible={fillVisible}
 						setVisible={(visible) => {
 							fillVisible = visible;
+						}}
+					/>
+				</div>
+			</div>
+		</div>
+		<div class="section">
+			<div class="title">Stroke</div>
+			<div class="content">
+				<div class="flex">
+					<div class="flex min-w-0">
+						<ColorInput bind:color={strokeColor} setColor={(newColor) => (strokeColor = newColor)} />
+						<div class="bg-gray-700 h-full w-px"/>
+						<OpacityInput bind:opacity={strokeOpacity} />
+					</div>
+					<VisibilityToggle
+						bind:visible={strokeVisible}
+						setVisible={(visible) => {
+							strokeVisible = visible;
 						}}
 					/>
 				</div>

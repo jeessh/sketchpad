@@ -1,5 +1,5 @@
 import { setCurrentTool } from '$lib/stores/globalStateStore';
-import { selectObject } from '$lib/stores/layerStateStore';
+import { selectObject, unselectAll, unselectObject } from '$lib/stores/layerStateStore';
 import paper, { Path } from 'paper';
 
 let path: paper.Path | undefined;
@@ -11,18 +11,23 @@ const tool = new paper.Tool();
 tool.onMouseDown = (event: paper.ToolEvent) => {
 	isDrawing = true;
 	startPoint = event.point;
+    unselectAll();
 };
 
 tool.onMouseMove = (event: paper.ToolEvent) => {
 	if (isDrawing) {
         path?.remove();
+        if (path) {
+            unselectObject(path);
+        }
 
         path = new Path.Rectangle({
             from: startPoint,
             to: event.point,
-            strokeColor: 'black',
-            strokeWidth: 1 / paper.view.zoom,
+            fillColor: '#C4C4C4',
         });
+
+        selectObject(path);
 	}
 };
 

@@ -3,7 +3,7 @@
 
 	let inputProps;
 	let labelWidth = ''; // default value for label width
-	$: ({ label, onChange, onKeyDown, onKeyUp, onKeyPress, ...inputProps } = $$props);
+	$: ({ label, onChange, onKeyDown, onKeyUp, onKeyPress, onFocus, style, ...inputProps } = $$props);
 
 	$: if (label) {
 		const str = label.toString();
@@ -11,7 +11,7 @@
 	}
 </script>
 
-<div class="input-group">
+<div class="input-group" {style}>
 	{#if label}
 		<label for={inputProps.id} style={labelWidth}>{label}</label>
 	{/if}
@@ -20,12 +20,14 @@
 		on:keydown={onKeyDown}
 		on:keyup={onKeyUp}
 		on:keypress={onKeyPress}
+		on:focus={onFocus}
 		{...inputProps}
 	/>
 </div>
 
 <style lang="scss">
 	.input-group {
+		min-width: 0;
 		display: flex;
 		align-items: center;
 		// flex-direction: column;
@@ -36,7 +38,8 @@
 		color: #b3b3b3;
 	}
 
-	input[type='text'] {
+	input {
+		min-width: 0;
 		border: 1px solid transparent;
 		border-radius: 8px;
 		background-color: #2b2b2b;

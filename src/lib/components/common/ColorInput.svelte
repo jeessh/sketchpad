@@ -7,17 +7,18 @@
 
 <div class="wrapper">
     <input type="color" value={color} on:input={(e) => setColor(e.target?.value)} />
-    <Input type="text" value={color} />
+    <Input type="text" value={color} onFocus={(e) => e.target.select()} />
 </div>
 
 <style>
     .wrapper {
+        flex-grow: 1;
+        min-width: 0;
         position: relative;
     }
     input[type='color'] {
         position: absolute;
         left: 0;
-        -webkit-appearance: none;
         background: none;
         border-radius: 2px;
         border-width: 0;
@@ -38,6 +39,7 @@
     .wrapper :global(input[type="text"]) {
         padding: 8px 8px;
         padding-left: 35px;
-        width: calc(100% - 43px);
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
     }
 </style>
