@@ -14,30 +14,7 @@ const oldStyles: Record<string, Partial<paper.Style>> = {};
 // subscribe to selected items, whenever it changes add blue border to selected items, don't use draw highlight
 let selectedItems: Set<paper.Item> = new Set();
 selectedItemsStore.subscribe((value) => {
-    // remove blue border from previous selected items
-    selectedItems.forEach((item: paper.Item) => {
-        item.style = {
-            ...item.style,
-            ...oldStyles[item.id],
-        }
-    });
-
     selectedItems = value;
-
-    selectedItems.forEach((item: paper.Item) => {
-        // set old style
-        if (!oldStyles[item.id]) {
-            oldStyles[item.id] = {
-                strokeColor: item.strokeColor,
-            }
-        }
-
-        // add blue border
-        item.style = {
-            ...item.style,
-            strokeColor: new Color('rgba(20, 143, 236, 1)'),
-        };
-    });
 });
 
 export const selectObject = (item: paper.Item) => {
@@ -61,13 +38,11 @@ export const unselectAll = () => {
 
 // subscribe to highlighted item, whenever it changes add blue border to highlighted item
 let highlightedItem: paper.Item | undefined;
+let highlightRectangle: paper.Path.Rectangle | null = null;
 highlightedItemStore.subscribe((value) => {
-    // remove blue border from previous highlighted item
-    if (highlightedItem && !selectedItems.has(highlightedItem)) {
-        highlightedItem.style = {
-            ...highlightedItem.style,
-            ...oldStyles[highlightedItem.id],
-        }
+    if (highlightRectangle) {
+        highlightRectangle.remove();
+        highlightRectangle = null;
     }
 
     highlightedItem = value;
@@ -81,10 +56,16 @@ highlightedItemStore.subscribe((value) => {
             }
         }
 
-        highlightedItem.style = {
-            ...highlightedItem.style,
-            strokeColor: new Color('rgba(20, 143, 236, 1)'),
-        };
+        if (!highlightRectangle) {
+            highlightRectangle = new paper.Path.Rectangle({
+                from: highlightedItem.bounds.topLeft,
+                to: highlightedItem.bounds.bottomRight,
+                strokeColor: new Color('rgba(20, 143, 236, 1)'),
+                strokeWidth: 1 / paper.view.zoom,
+                parent: highlightedItem,
+            });
+            highlightRectangle.data.internal = true;
+        }
     }
 });
 

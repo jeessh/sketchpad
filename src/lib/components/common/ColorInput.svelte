@@ -11,7 +11,7 @@
 		if (color.length === 0) return undefined;
 
 		const firstColor = color[0];
-		if (color.every((c) => c.equals(firstColor))) {
+		if (color.every((c) => c && c.equals(firstColor))) {
 			return firstColor.toCSS(true);
 		}
 
