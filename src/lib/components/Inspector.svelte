@@ -136,15 +136,17 @@
 				<div class="flex">
 					<div class="flex min-w-0">
 						<ColorInput bind:color={fillColor} setColor={(newColor) => (fillColor = newColor)} />
-						<div class="bg-gray-700 h-full w-px"/>
-						<OpacityInput bind:opacity={fillOpacity} />
+						<div class="h-full w-px" style="background-color: #303437;"/>
+						<OpacityInput bind:opacity={fillOpacity} setOpacity={(newOpacity) => fillOpacity = newOpacity} />
 					</div>
-					<VisibilityToggle
-						bind:visible={fillVisible}
-						setVisible={(visible) => {
-							fillVisible = visible;
-						}}
-					/>
+					<div class="ml-1 h-full">
+						<VisibilityToggle
+							bind:visible={fillVisible}
+							setVisible={(visible) => {
+								fillVisible = visible;
+							}}
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -154,15 +156,17 @@
 				<div class="flex">
 					<div class="flex min-w-0">
 						<ColorInput bind:color={strokeColor} setColor={(newColor) => (strokeColor = newColor)} />
-						<div class="bg-gray-700 h-full w-px"/>
-						<OpacityInput bind:opacity={strokeOpacity} />
+						<div class="h-full w-px" style="background-color: #303437;"/>
+						<OpacityInput bind:opacity={strokeOpacity} setOpacity={(newOpacity) => strokeOpacity = newOpacity} />
 					</div>
-					<VisibilityToggle
-						bind:visible={strokeVisible}
-						setVisible={(visible) => {
-							strokeVisible = visible;
-						}}
-					/>
+					<div class="ml-1 h-full">
+						<VisibilityToggle
+							bind:visible={strokeVisible}
+							setVisible={(visible) => {
+								strokeVisible = visible;
+							}}
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -170,6 +174,10 @@
 </div>
 
 <style>
+	:root {
+		user-select: none;
+	}
+
 	.inspector {
 		background-color: #232323;
 		color: white;

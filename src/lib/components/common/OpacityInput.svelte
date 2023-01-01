@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Input from './Input.svelte';
 
+	export let opacity: number;
+	export let setOpacity: (opacity: number) => void;
 	$: ({ opacity, setOpacity, ...inputProps } = $$props);
 
 	$: displayOpacity = `${Math.round(opacity * 100)}%`;
