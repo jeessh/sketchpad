@@ -59,8 +59,14 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 	}
 };
 
+const inSelectionBounds = (point: paper.Point) => {
+	const tolerance = 5 / paper.view.zoom;
+	return selectionBounds && selectionBounds.expand(tolerance).contains(point);
+};
+
 let originalSelectedItems: Set<paper.Item>;
 let scaler: Scaler | null = null;
+let clickedItem: paper.Item | null = null;
 tool.onMouseDown = (event: paper.ToolEvent) => {
 	const hitResult = paper.project.hitTest(event.point, {
 		fill: true,
@@ -83,28 +89,32 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 			scaler.setScaleAboutPoint(type, selectionBounds);
 
 			return;
-		}
+		} else {
+			if (!inSelectionBounds(event.point) && !isShiftKeyPressed) {
+				unselectAll();
+			} else {
+				clickedItem = item;
+			}
 
-		if (!selectionBounds && !moved) {
-			unselectAll();
-		}
-
-		if (!selectionBounds) {
-			// if nothing is selected, select the item
-			selectObject(item);
+			// create bounding box
+			if (isShiftKeyPressed && selectedItems.has(item)) {
+				unselectObject(item);
+			} else {
+				selectObject(item);
+			}
 		}
 	}
 
 	// if inside selection bounds
-	// const debugRect = selectionBounds?.expand(5);
-	// draw debugRect
-	// new Path.Rectangle(debugRect!).fillColor = new Color(1, 0, 0, 0.2);
-	const tolerance = 5 / paper.view.zoom;
-
-	if (selectionBounds && selectionBounds.expand(tolerance).contains(event.point)) {
+	if (inSelectionBounds(event.point)) {
 		moving = true;
 		moved = false;
+		unhighlightItem();
 		return;
+	} else {
+		if (!isShiftKeyPressed) {
+			unselectAll();
+		}
 	}
 
 	selectStartPoint = event.point;
@@ -173,51 +183,20 @@ tool.onMouseDrag = (event: paper.ToolEvent) => {
 };
 
 // select all items that collide with the rectangle, highlighting in a blue border
-tool.onMouseUp = (event: paper.ToolEvent) => {
-	let items: paper.Item[] = [];
-
-	// single click
-	if (!selectRectangle && !moved && !scaler) {
-		items = paper.project
-			.hitTestAll(event.point, {
-				fill: true,
-				stroke: true,
-				segments: true,
-				tolerance: 5
-			})
-			.map((hit) => hit.item)
-			.filter((item) => !item.data.internal);
-
-		// only get the topmost item
-		if (items.length > 0) {
-			items = [items[0]];
-		}
-		if (!isShiftKeyPressed) {
-			selectedItemsStore.set(new Set());
-			drawHighlight();
-		}
-
-		if (moving) {
-			moving = false;
-		}
-
-		// create bounding box
-		items.forEach((item) => {
-			if (isShiftKeyPressed && selectedItems.has(item)) {
-				unselectObject(item);
-			} else {
-				selectObject(item);
-			}
-		});
-	}
-
+tool.onMouseUp = () => {
 	// remove the rectangle
 	selectRectangle?.remove();
 	selectRectangle = null;
 
+	if (moving && !moved && clickedItem && !isShiftKeyPressed) {
+		unselectAll();
+		selectObject(clickedItem);
+	}
+
 	moving = false;
 	moved = false;
 	scaler = null;
+	clickedItem = null;
 };
 
 // when switching to pan tool, remove the selection rectangle

@@ -11,10 +11,25 @@ let highlight: paper.Group | null = null;
 // dict of old styles
 const oldStyles: Record<string, Partial<paper.Style>> = {};
 
+const drawSelectedItemsBorder = () => {
+    selectedItemsHighlight.forEach((item) => item.remove());
+
+    selectedItems.forEach((item: paper.Item) => {
+        const hl = makeBounds(item.bounds);
+        hl.strokeColor = new Color('rgba(20, 143, 236, 1)');
+        hl.strokeWidth = 1 / paper.view.zoom;
+        hl.data.internal = true;
+        selectedItemsHighlight.add(hl);
+    }); 
+}
+
 // subscribe to selected items, whenever it changes add blue border to selected items, don't use draw highlight
 let selectedItems: Set<paper.Item> = new Set();
+const selectedItemsHighlight: Set<paper.Item> = new Set();
 selectedItemsStore.subscribe((value) => {
     selectedItems = value;
+
+    drawSelectedItemsBorder();
 });
 
 export const selectObject = (item: paper.Item) => {
@@ -80,6 +95,7 @@ export const unhighlightItem = () => {
 
 export const drawHighlight = () => {
 	highlight?.remove();
+    drawSelectedItemsBorder();
 
 	if (selectedItems.size === 0) {
 		selectionBoundsStore.set(undefined);
