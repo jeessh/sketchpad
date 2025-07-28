@@ -3,7 +3,8 @@
 
 	export let opacity: number;
 	export let setOpacity: (opacity: number) => void;
-	$: ({ opacity, setOpacity, ...inputProps } = $$props);
+	export let onKeyDown: ((e: KeyboardEvent) => void) | undefined = undefined;
+	$: ({ opacity, setOpacity, onKeyDown, ...inputProps } = $$props);
 
 	$: displayOpacity = `${Math.round(opacity * 100)}%`;
 
@@ -13,6 +14,11 @@
 		if (isNaN(opacity)) return;
 		setOpacity(opacity);
 	};
+
+	const handleFocus = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		target.select();
+	};
 </script>
 
 <div id="wrapper" class="min-w-0" style="flex-basis: 100px;">
@@ -20,9 +26,8 @@
 		type="text"
 		value={displayOpacity}
 		onChange={updateOpacity}
-		onFocus={(e) => {
-			e.target.select();
-		}}
+		onFocus={handleFocus}
+		onKeyDown={onKeyDown}
 		{...inputProps}
 	/>
 </div>

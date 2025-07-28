@@ -5,6 +5,7 @@
 	import { setCurrentTool, getCurrentTool, type TTool } from '$lib/stores/globalStateStore';
 	import { canvasRef } from '$lib/stores/globalRefsStateStore';
 	import { drawHighlight } from '$lib/stores/layerStateStore';
+	import { initializeLayers } from '$lib/stores/layerManagerStore';
 
 	let canvas: HTMLCanvasElement;
 	let wrapper: HTMLDivElement;
@@ -42,6 +43,7 @@
 		canvasRef.set(canvas);
 		paper.setup(canvas);
 		setCanvasSize();
+		initializeLayers(); // Initialize layer management system
 		window.addEventListener('resize', setCanvasSize);
 
 		window.addEventListener('keydown', (event) => {

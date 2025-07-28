@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import paper, { Color, Group } from 'paper';
 import { makeBounds, makeCorners } from '$lib/util/selection';
+import { selectLayerForItem } from './layerManagerStore';
 
 export const selectedItemsStore = writable(new Set<paper.Item>());
 export const selectionBoundsStore = writable<paper.Rectangle | undefined>();
@@ -36,6 +37,8 @@ export const selectObject = (item: paper.Item) => {
 	if (!item.data.internal && !selectedItems.has(item)) {
 		selectedItemsStore.set(new Set([...selectedItems, item]));
 		drawHighlight();
+		// Automatically select the layer that contains this item
+		selectLayerForItem(item);
 	}
 };
 

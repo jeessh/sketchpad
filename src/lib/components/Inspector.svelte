@@ -10,6 +10,7 @@
 	} from '$lib/stores/layerStateStore';
 	import OpacityInput from './common/OpacityInput.svelte';
 	import { getFill, getStroke } from '$lib/util/properties';
+	import LayerManager from './common/LayerManager.svelte';
 
 	let fillVisible = true;
 	let fillColor: paper.Color[] = [];
@@ -24,11 +25,38 @@
 		bounds = value;
 	});
 
+	// Helper functions to get opacity from selected items
+	const getFillOpacity = (items: paper.Item[]): number => {
+		if (items.length === 0) return 1.0;
+		
+		const firstOpacity = items[0].fillColor?.alpha ?? 1.0;
+		const allSame = items.every((item) => {
+			const itemOpacity = item.fillColor?.alpha ?? 1.0;
+			return Math.abs(itemOpacity - firstOpacity) < 0.01; // Small tolerance for floating point comparison
+		});
+		
+		return allSame ? firstOpacity : firstOpacity; // For mixed, we could return average or first item's value
+	};
+
+	const getStrokeOpacity = (items: paper.Item[]): number => {
+		if (items.length === 0) return 1.0;
+		
+		const firstOpacity = items[0].strokeColor?.alpha ?? 1.0;
+		const allSame = items.every((item) => {
+			const itemOpacity = item.strokeColor?.alpha ?? 1.0;
+			return Math.abs(itemOpacity - firstOpacity) < 0.01;
+		});
+		
+		return allSame ? firstOpacity : firstOpacity;
+	};
+
 	let selectedItems = new Set<paper.Item>();
 	selectedItemsStore.subscribe((value) => {
 		selectedItems = value;
 		fillColor = getFill(Array.from(value));
 		strokeColor = getStroke(Array.from(value));
+		fillOpacity = getFillOpacity(Array.from(value));
+		strokeOpacity = getStrokeOpacity(Array.from(value));
 	});
 
 	const setFillColor = (color: paper.Color) => {
@@ -43,6 +71,26 @@
 			item.strokeColor = color;
 		});
 		strokeColor = getStroke(Array.from(selectedItems));
+	};
+
+	const setFillOpacity = (newOpacity: number) => {
+		selectedItems.forEach((item) => {
+			if (item.fillColor) {
+				item.fillColor.alpha = newOpacity;
+			}
+		});
+		fillOpacity = newOpacity;
+		drawHighlight();
+	};
+
+	const setStrokeOpacity = (newOpacity: number) => {
+		selectedItems.forEach((item) => {
+			if (item.strokeColor) {
+				item.strokeColor.alpha = newOpacity;
+			}
+		});
+		strokeOpacity = newOpacity;
+		drawHighlight();
 	};
 
 	const updateX = (e: Event) => {
@@ -96,10 +144,21 @@
 			target.blur();
 		}
 	};
+
+	// shared keyboard handler for color and opacity inputs
+	const handleColorOpacityKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Enter' || e.key === 'Escape') {
+			const target = e.target as HTMLInputElement;
+			target.blur();
+		}
+	};
 </script>
 
 <div class="inspector" on:keydown={(e) => e.stopPropagation()}>
 	<div class="sections">
+		<div class="section">
+			<LayerManager />
+		</div>
 		{#if bounds}
 			<div class="section">
 				<div class="title">Transform</div>
@@ -156,11 +215,12 @@
 			<div class="content">
 				<div class="flex">
 					<div class="flex min-w-0">
-						<ColorInput bind:color={fillColor} setColor={setFillColor} />
+						<ColorInput bind:color={fillColor} setColor={setFillColor} onKeyDown={handleColorOpacityKeyDown} />
 						<div class="h-full w-px" style="background-color: #303437;" />
 						<OpacityInput
 							bind:opacity={fillOpacity}
-							setOpacity={(newOpacity) => (fillOpacity = newOpacity)}
+							setOpacity={setFillOpacity}
+							onKeyDown={handleColorOpacityKeyDown}
 						/>
 					</div>
 					<div class="ml-1 h-full">
@@ -179,11 +239,12 @@
 			<div class="content">
 				<div class="flex">
 					<div class="flex min-w-0">
-						<ColorInput bind:color={strokeColor} setColor={setStrokeColor} />
+						<ColorInput bind:color={strokeColor} setColor={setStrokeColor} onKeyDown={handleColorOpacityKeyDown} />
 						<div class="h-full w-px" style="background-color: #303437;" />
 						<OpacityInput
 							bind:opacity={strokeOpacity}
-							setOpacity={(newOpacity) => (strokeOpacity = newOpacity)}
+							setOpacity={setStrokeOpacity}
+							onKeyDown={handleColorOpacityKeyDown}
 						/>
 					</div>
 					<div class="ml-1 h-full">

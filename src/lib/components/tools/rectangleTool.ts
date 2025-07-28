@@ -1,5 +1,6 @@
 import { setCurrentTool } from '$lib/stores/globalStateStore';
 import { selectObject, unselectAll, unselectObject } from '$lib/stores/layerStateStore';
+import { createLayerForNewElement } from '$lib/stores/layerManagerStore';
 import paper, { Path } from 'paper';
 
 let path: paper.Path | undefined;
@@ -12,6 +13,8 @@ tool.onMouseDown = (event: paper.ToolEvent) => {
 	isDrawing = true;
 	startPoint = event.point;
     unselectAll();
+    // Create a new layer for this rectangle before drawing
+    createLayerForNewElement('Rectangle');
 };
 
 tool.onMouseMove = (event: paper.ToolEvent) => {

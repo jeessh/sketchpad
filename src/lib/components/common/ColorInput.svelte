@@ -4,6 +4,7 @@
 
 	export let color: paper.Color[];
 	export let setColor: (arg0: paper.Color) => void;
+	export let onKeyDown: ((e: KeyboardEvent) => void) | undefined = undefined;
 
 	// if all colors are the same, return that color
 	// otherwise, return "Mixed"
@@ -68,6 +69,7 @@
 		bind:value={displayColor}
 		onFocus={handleTextInputFocus}
         onChange={checkAndSetColor}
+		onKeyDown={onKeyDown}
 	/>
 </div>
 
