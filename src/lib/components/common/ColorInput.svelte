@@ -20,6 +20,15 @@
 
 	$: colorString = getColorString();
 	$: displayColor = colorString === undefined ? 'None' : colorString;
+	
+	// For the color input, we need a separate value that can be bound
+	$: colorPickerValue = colorString && colorString !== 'Mixed' ? colorString : '#000000';
+
+	function handleColorPickerChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		const newColor = new Color(target.value);
+		setColor(newColor);
+	}
 
     function checkAndSetColor(e: Event) {
         const target = e.target as HTMLInputElement;
@@ -41,18 +50,23 @@
         const newColor = new Color(`#${inputColor}`);
         setColor(newColor);
     }
+
+	function handleTextInputFocus(e: Event) {
+		const target = e.target as HTMLInputElement;
+		target.select();
+	}
 </script>
 
 <div class="wrapper">
 	<input
 		type="color"
-		bind:value={colorString}
-		on:input={(e) => setColor(new Color(e.target?.value))}
+		value={colorPickerValue}
+		on:input={handleColorPickerChange}
 	/>
 	<Input
 		type="text"
 		bind:value={displayColor}
-		onFocus={(e) => e.target.select()}
+		onFocus={handleTextInputFocus}
         onChange={checkAndSetColor}
 	/>
 </div>
