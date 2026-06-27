@@ -97,7 +97,10 @@ const LayerRow = ({
           onKeyDown={(e) => {
             e.stopPropagation();
             if (e.key === 'Enter') commitEdit();
-            if (e.key === 'Escape') setEditing(false);
+            if (e.key === 'Escape') {
+              setEditValue(layer.name);
+              setEditing(false);
+            }
           }}
         />
       ) : (
