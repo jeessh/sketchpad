@@ -1,26 +1,26 @@
 body {
-    margin: 0;
-    font-family: 'Untitled Sans', sans-serif;
-    font-size: 12px;
+	margin: 0;
+	font-family: 'Untitled Sans', sans-serif;
+	font-size: 12px;
 }
 
 @font-face {
-    font-family: 'Untitled Sans';
-    src: url('fonts/UntitledSans-Regular.woff2') format('woff2'),
-         url('fonts/UntitledSans-Regular.woff') format('woff');
-    font-weight: normal;
+	font-family: 'Untitled Sans';
+	src: url('fonts/UntitledSans-Regular.woff2') format('woff2'),
+		url('fonts/UntitledSans-Regular.woff') format('woff');
+	font-weight: normal;
 }
 
 @font-face {
-    font-family: 'Untitled Sans';
-    src: url('fonts/UntitledSans-Medium.woff2') format('woff2'),
-         url('fonts/UntitledSans-Medium.woff') format('woff');
-    font-weight: medium;
+	font-family: 'Untitled Sans';
+	src: url('fonts/UntitledSans-Medium.woff2') format('woff2'),
+		url('fonts/UntitledSans-Medium.woff') format('woff');
+	font-weight: medium;
 }
 
 @font-face {
-    font-family: 'Untitled Sans';
-    src: url('fonts/UntitledSans-Bold.woff2') format('woff2'),
-         url('fonts/UntitledSans-Bold.woff') format('woff');
-    font-weight: bold;
+	font-family: 'Untitled Sans';
+	src: url('fonts/UntitledSans-Bold.woff2') format('woff2'),
+		url('fonts/UntitledSans-Bold.woff') format('woff');
+	font-weight: bold;
 }

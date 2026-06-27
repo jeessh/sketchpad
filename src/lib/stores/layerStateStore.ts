@@ -1,10 +1,10 @@
-import { writable } from 'svelte/store';
+import { writable } from './simpleStore';
 import paper, { Color, Group } from 'paper';
 import { makeBounds, makeCorners } from '$lib/util/selection';
 
 export const selectedItemsStore = writable(new Set<paper.Item>());
-export const selectionBoundsStore = writable<paper.Rectangle | undefined>();
-export const highlightedItemStore = writable<paper.Item | undefined>();
+export const selectionBoundsStore = writable<paper.Rectangle | undefined>(undefined);
+export const highlightedItemStore = writable<paper.Item | undefined>(undefined);
 
 let highlight: paper.Group | null = null;
 
@@ -12,24 +12,24 @@ let highlight: paper.Group | null = null;
 const oldStyles: Record<string, Partial<paper.Style>> = {};
 
 const drawSelectedItemsBorder = () => {
-    selectedItemsHighlight.forEach((item) => item.remove());
+	selectedItemsHighlight.forEach((item) => item.remove());
 
-    selectedItems.forEach((item: paper.Item) => {
-        const hl = makeBounds(item.bounds);
-        hl.strokeColor = new Color('rgba(20, 143, 236, 1)');
-        hl.strokeWidth = 1 / paper.view.zoom;
-        hl.data.internal = true;
-        selectedItemsHighlight.add(hl);
-    }); 
-}
+	selectedItems.forEach((item: paper.Item) => {
+		const hl = makeBounds(item.bounds);
+		hl.strokeColor = new Color('rgba(20, 143, 236, 1)');
+		hl.strokeWidth = 1 / paper.view.zoom;
+		hl.data.internal = true;
+		selectedItemsHighlight.add(hl);
+	});
+};
 
 // subscribe to selected items, whenever it changes add blue border to selected items, don't use draw highlight
 let selectedItems: Set<paper.Item> = new Set();
 const selectedItemsHighlight: Set<paper.Item> = new Set();
 selectedItemsStore.subscribe((value) => {
-    selectedItems = value;
+	selectedItems = value;
 
-    drawSelectedItemsBorder();
+	drawSelectedItemsBorder();
 });
 
 export const selectObject = (item: paper.Item) => {
@@ -55,35 +55,34 @@ export const unselectAll = () => {
 let highlightedItem: paper.Item | undefined;
 let highlightRectangle: paper.Path.Rectangle | null = null;
 highlightedItemStore.subscribe((value) => {
-    if (highlightRectangle) {
-        highlightRectangle.remove();
-        highlightRectangle = null;
-    }
+	if (highlightRectangle) {
+		highlightRectangle.remove();
+		highlightRectangle = null;
+	}
 
-    highlightedItem = value;
+	highlightedItem = value;
 
-    // add blue border
-    if (highlightedItem) {
-        // set old style
-        if (!oldStyles[highlightedItem.id]) {
-            oldStyles[highlightedItem.id] = {
-                strokeColor: highlightedItem.strokeColor,
-            }
-        }
+	// add blue border
+	if (highlightedItem) {
+		// set old style
+		if (!oldStyles[highlightedItem.id]) {
+			oldStyles[highlightedItem.id] = {
+				strokeColor: highlightedItem.strokeColor
+			};
+		}
 
-        if (!highlightRectangle) {
-            highlightRectangle = new paper.Path.Rectangle({
-                from: highlightedItem.bounds.topLeft,
-                to: highlightedItem.bounds.bottomRight,
-                strokeColor: new Color('rgba(20, 143, 236, 1)'),
-                strokeWidth: 1 / paper.view.zoom,
-                parent: highlightedItem,
-            });
-            highlightRectangle.data.internal = true;
-        }
-    }
+		if (!highlightRectangle) {
+			highlightRectangle = new paper.Path.Rectangle({
+				from: highlightedItem.bounds.topLeft,
+				to: highlightedItem.bounds.bottomRight,
+				strokeColor: new Color('rgba(20, 143, 236, 1)'),
+				strokeWidth: 1 / paper.view.zoom,
+				parent: highlightedItem
+			});
+			highlightRectangle.data.internal = true;
+		}
+	}
 });
-
 
 export const highlightItem = (item: paper.Item) => {
 	highlightedItemStore.set(item);
@@ -95,7 +94,7 @@ export const unhighlightItem = () => {
 
 export const drawHighlight = () => {
 	highlight?.remove();
-    drawSelectedItemsBorder();
+	drawSelectedItemsBorder();
 
 	if (selectedItems.size === 0) {
 		selectionBoundsStore.set(undefined);
@@ -103,7 +102,13 @@ export const drawHighlight = () => {
 	}
 
 	// get bounding box that contains all selected items
-	let bounds = selectedItems.values().next().value.bounds;
+	const firstSelectedItem = selectedItems.values().next().value;
+	if (!firstSelectedItem) {
+		selectionBoundsStore.set(undefined);
+		return;
+	}
+
+	let bounds = firstSelectedItem.bounds;
 	selectedItems.forEach((item) => {
 		bounds = bounds.unite(item.bounds);
 	});

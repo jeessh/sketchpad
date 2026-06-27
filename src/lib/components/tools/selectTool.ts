@@ -213,7 +213,6 @@ tool.onKeyDown = (event: paper.KeyEvent) => {
 		selectedItemsStore.set(new Set());
 		drawHighlight();
 	}
-
 };
 
 export default tool;

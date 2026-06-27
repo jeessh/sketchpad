@@ -1,4 +1,4 @@
-import { get, writable } from 'svelte/store';
+import { get, writable } from './simpleStore';
 import { selectTool, pencilTool, panTool, rectangleTool } from '$lib/components/tools';
 import { setCursor } from '$lib/util/cursor';
 
@@ -20,7 +20,7 @@ const tools: Record<TTool, { tool: paper.Tool; cursor: string }> = {
 	pencil: {
 		tool: pencilTool,
 		cursor: 'crosshair'
-	},
+	}
 };
 
 /* Current Tool */
@@ -29,12 +29,12 @@ export const setCurrentTool = (target: TTool) => {
 	const prevTool = get(currentTool);
 	const { tool, cursor } = tools[target];
 	currentTool.set(target);
-    tool.activate();
+	tool.activate();
 	setCursor(cursor);
 
 	return prevTool;
 };
 
 export const getCurrentTool = () => {
-    return get(currentTool);
-}
+	return get(currentTool);
+};

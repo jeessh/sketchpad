@@ -8,27 +8,27 @@ export const makeCorners = (b: paper.Rectangle) => {
 			type: 'topLeft',
 			bounds: b.topLeft,
 			cursor: 'nwse-resize',
-			resize: 'both',
+			resize: 'both'
 		},
 		{
 			type: 'topRight',
 			bounds: b.topRight,
 			cursor: 'nesw-resize',
-			resize: 'both',
+			resize: 'both'
 		},
 		{
 			type: 'bottomLeft',
 			bounds: b.bottomLeft,
 			cursor: 'nesw-resize',
-			resize: 'both',
+			resize: 'both'
 		},
 		{
 			type: 'bottomRight',
 			bounds: b.bottomRight,
 			cursor: 'nwse-resize',
-			resize: 'both',
-		},
-	]
+			resize: 'both'
+		}
+	];
 	corners.forEach(function (corner) {
 		const h = new Path.Rectangle({
 			center: corner.bounds,
@@ -61,36 +61,36 @@ export const makeBounds = (b: paper.Rectangle) => {
 			from: [x, y],
 			to: [x + width, y],
 			cursor: 'ns-resize',
-			resize: 'height',
+			resize: 'height'
 		},
 		{
 			type: 'right',
 			from: [x + width, y],
 			to: [x + width, y + height],
 			cursor: 'ew-resize',
-			resize: 'width',
+			resize: 'width'
 		},
 		{
 			type: 'bottom',
 			from: [x + width, y + height],
 			to: [x, y + height],
 			cursor: 'ns-resize',
-			resize: 'height',
+			resize: 'height'
 		},
 		{
 			type: 'left',
 			from: [x, y + height],
 			to: [x, y],
 			cursor: 'ew-resize',
-			resize: 'width',
-		},
+			resize: 'width'
+		}
 	];
 
 	lines.forEach(function (line) {
 		const l = new Path.Line({
 			from: line.from,
 			to: line.to,
-			strokeWidth,
+			strokeWidth
 		});
 		l.data.internal = true;
 		l.data.cursor = line.cursor;

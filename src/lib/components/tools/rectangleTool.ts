@@ -11,33 +11,33 @@ const tool = new paper.Tool();
 tool.onMouseDown = (event: paper.ToolEvent) => {
 	isDrawing = true;
 	startPoint = event.point;
-    unselectAll();
+	unselectAll();
 };
 
 tool.onMouseMove = (event: paper.ToolEvent) => {
 	if (isDrawing) {
-        path?.remove();
-        if (path) {
-            unselectObject(path);
-        }
+		path?.remove();
+		if (path) {
+			unselectObject(path);
+		}
 
-        path = new Path.Rectangle({
-            from: startPoint,
-            to: event.point,
-            fillColor: '#C4C4C4',
-        });
+		path = new Path.Rectangle({
+			from: startPoint,
+			to: event.point,
+			fillColor: '#C4C4C4'
+		});
 
-        selectObject(path);
+		selectObject(path);
 	}
 };
 
 tool.onMouseUp = () => {
 	isDrawing = false;
-    if (path) {
-        selectObject(path);
-        setCurrentTool('select');
-    }
-    path = undefined;
+	if (path) {
+		selectObject(path);
+		setCurrentTool('select');
+	}
+	path = undefined;
 };
 
 export default tool;
