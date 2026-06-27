@@ -187,3 +187,114 @@ input {
 .visibility-toggle:hover {
 	background-color: #303437;
 }
+
+.layer-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 6px;
+	border-radius: 6px;
+	cursor: pointer;
+	border: 1px solid transparent;
+	user-select: none;
+	position: relative;
+}
+
+.layer-row:hover {
+	background-color: #2b2b2b;
+}
+
+.layer-row--selected {
+	background-color: #1d3a5a;
+	border-color: #1d71ae;
+}
+
+.layer-row__handle {
+	color: #666;
+	cursor: grab;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	padding: 2px;
+}
+
+.layer-row__handle:hover {
+	color: #999;
+}
+
+.layer-row__name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 13px;
+}
+
+.layer-row__name-input {
+	flex: 1;
+	min-width: 0;
+	border: 1px solid #1d71ae;
+	border-radius: 4px;
+	background: #2b2b2b;
+	color: white;
+	padding: 1px 4px;
+	font-size: 13px;
+	outline: none;
+}
+
+.layer-row__visibility {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3px;
+	border: 0;
+	border-radius: 4px;
+	background: transparent;
+	color: white;
+	cursor: pointer;
+}
+
+.layer-row__visibility:hover {
+	background-color: #303437;
+}
+
+.layer-row--drop-above::before,
+.layer-row--drop-below::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: #1d71ae;
+	border-radius: 1px;
+}
+
+.layer-row--drop-above::before {
+	top: -1px;
+}
+
+.layer-row--drop-below::after {
+	bottom: -1px;
+}
+
+.layer-row__delete {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3px 5px;
+	border: 0;
+	border-radius: 4px;
+	background: transparent;
+	color: #b3b3b3;
+	cursor: pointer;
+	font-size: 14px;
+	line-height: 1;
+}
+
+.layer-row__delete:hover {
+	background-color: #5a1d1d;
+	color: #ff6b6b;
+}
