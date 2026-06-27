@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Input from './Input';
 
 interface OpacityInputProps {
@@ -6,21 +7,44 @@ interface OpacityInputProps {
 }
 
 const OpacityInput = ({ opacity, setOpacity }: OpacityInputProps) => {
-	const displayOpacity = `${Math.round(opacity * 100)}%`;
+	const [focused, setFocused] = useState(false);
+	const [rawValue, setRawValue] = useState('');
 
-	const updateOpacity = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const nextOpacity = parseFloat(event.currentTarget.value) / 100;
-		if (Number.isNaN(nextOpacity)) return;
-		setOpacity(nextOpacity);
+	const displayValue = focused ? rawValue : `${Math.round(opacity * 100)}%`;
+
+	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const str = event.currentTarget.value;
+		setRawValue(str);
+		if (str === '') {
+			setOpacity(0);
+			return;
+		}
+		const raw = parseFloat(str);
+		if (Number.isNaN(raw)) return;
+		const clamped = Math.min(100, Math.max(0, raw));
+		setOpacity(clamped / 100);
+	};
+
+	const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+		setRawValue(String(Math.round(opacity * 100)));
+		setFocused(true);
+		const el = event.currentTarget;
+		requestAnimationFrame(() => el.select());
+	};
+
+	const handleBlur = () => {
+		setFocused(false);
+		setRawValue('');
 	};
 
 	return (
 		<div className="opacity-input-wrapper">
 			<Input
 				type="text"
-				value={displayOpacity}
-				onChange={updateOpacity}
-				onFocus={(event) => event.currentTarget.select()}
+				value={displayValue}
+				onChange={handleChange}
+				onFocus={handleFocus}
+				onBlur={handleBlur}
 			/>
 		</div>
 	);

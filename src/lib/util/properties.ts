@@ -33,3 +33,14 @@ export const setStroke = (items: paper.Item | paper.Item[], color: paper.Color):
 		(items as paper.Item).strokeColor = color;
 	}
 };
+
+export const getStrokeWidth = (items: paper.Item[]): number => {
+	if (items.length === 0) return 0;
+	return items[0].strokeWidth ?? 0;
+};
+
+export const setStrokeWidth = (items: paper.Item[], width: number): void => {
+	items.forEach((item) => {
+		item.strokeWidth = width;
+	});
+};

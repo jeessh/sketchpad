@@ -33,16 +33,33 @@ selectionBoundsStore.subscribe((value) => {
 	selectionBounds = value;
 });
 
-// create the select tool
-const tool = new paper.Tool();
-tool.onMouseMove = (event: paper.ToolEvent) => {
-	// do a hit test on the mouse position, if over a corner, change the cursor
-	const hitResult = paper.project.hitTest(event.point, {
+// Paper.js hitTest skips items with null/transparent fills, so fall back to a
+// bounds-point check for any non-internal item that would otherwise be missed.
+const hitTestWithTransparent = (point: paper.Point): paper.HitResult | null => {
+	const hitResult = paper.project.hitTest(point, {
 		fill: true,
 		stroke: true,
 		segments: true,
 		tolerance: 5
 	});
+	if (hitResult) return hitResult;
+
+	// Fallback: find topmost non-internal item whose bounds contain the point
+	const allItems = paper.project.getItems({ match: (item: paper.Item) => !item.data.internal });
+	for (let i = allItems.length - 1; i >= 0; i--) {
+		const item = allItems[i];
+		if (item.bounds.contains(point)) {
+			return { item } as paper.HitResult;
+		}
+	}
+	return null;
+};
+
+// create the select tool
+const tool = new paper.Tool();
+tool.onMouseMove = (event: paper.ToolEvent) => {
+	// do a hit test on the mouse position, if over a corner, change the cursor
+	const hitResult = hitTestWithTransparent(event.point);
 
 	if (hitResult) {
 		const { item } = hitResult;
@@ -69,12 +86,7 @@ let originalSelectedItems: Set<paper.Item>;
 let scaler: Scaler | null = null;
 let clickedItem: paper.Item | null = null;
 tool.onMouseDown = (event: paper.ToolEvent) => {
-	const hitResult = paper.project.hitTest(event.point, {
-		fill: true,
-		stroke: true,
-		segments: true,
-		tolerance: 5
-	});
+	const hitResult = hitTestWithTransparent(event.point);
 
 	if (hitResult) {
 		const { item } = hitResult;
