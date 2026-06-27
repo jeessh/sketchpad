@@ -35,6 +35,7 @@ const LayerRow = ({
   const [editValue, setEditValue] = useState(layer.name);
   const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const cancellingRef = useRef(false);
 
   useEffect(() => {
     if (editing) inputRef.current?.select();
@@ -47,6 +48,10 @@ const LayerRow = ({
   };
 
   const commitEdit = () => {
+    if (cancellingRef.current) {
+      cancellingRef.current = false;
+      return;
+    }
     setEditing(false);
     const trimmed = editValue.trim();
     onRename(layer.id, trimmed || layer.name);
@@ -76,7 +81,7 @@ const LayerRow = ({
   return (
     <div
       className={classNames}
-      draggable
+      draggable={!editing}
       onClick={() => onSelect(layer.id)}
       onDragStart={() => onDragStart(layer.id)}
       onDragOver={handleDragOver}
@@ -98,6 +103,7 @@ const LayerRow = ({
             e.stopPropagation();
             if (e.key === 'Enter') commitEdit();
             if (e.key === 'Escape') {
+              cancellingRef.current = true;
               setEditValue(layer.name);
               setEditing(false);
             }

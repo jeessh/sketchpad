@@ -48,8 +48,12 @@ export function toggleLayerVisibility(id: number): void {
     item.visible = false;
   } else {
     item.visible = true;
-    item.fillColor = item.data._savedFillColor ?? null;
-    item.strokeColor = item.data._savedStrokeColor ?? null;
+    if ('_savedFillColor' in item.data) {
+      item.fillColor = item.data._savedFillColor ?? null;
+    }
+    if ('_savedStrokeColor' in item.data) {
+      item.strokeColor = item.data._savedStrokeColor ?? null;
+    }
   }
   refreshLayers();
 }
