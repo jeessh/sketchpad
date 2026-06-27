@@ -1,5 +1,6 @@
 import paper, { Color, Path } from 'paper';
 import { shiftKeyPressed } from '$lib/stores/keyboardStateStore';
+import { refreshLayers } from '$lib/stores/layersStore';
 import {
 	drawHighlight,
 	highlightItem,
@@ -212,6 +213,7 @@ tool.onKeyDown = (event: paper.KeyEvent) => {
 		});
 		selectedItemsStore.set(new Set());
 		drawHighlight();
+		refreshLayers();
 	}
 };
 

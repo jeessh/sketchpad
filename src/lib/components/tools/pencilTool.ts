@@ -1,3 +1,4 @@
+import { refreshLayers } from '$lib/stores/layersStore';
 import paper, { Color, Path } from 'paper';
 
 let path: paper.Path;
@@ -23,6 +24,7 @@ tool.onMouseMove = (event: paper.ToolEvent) => {
 
 tool.onMouseUp = () => {
 	isDrawing = false;
+	refreshLayers();
 };
 
 export default tool;

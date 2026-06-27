@@ -1,5 +1,6 @@
 import { setCurrentTool } from '$lib/stores/globalStateStore';
 import { selectObject, unselectAll, unselectObject } from '$lib/stores/layerStateStore';
+import { refreshLayers } from '$lib/stores/layersStore';
 import paper, { Path } from 'paper';
 
 let path: paper.Path | undefined;
@@ -38,6 +39,7 @@ tool.onMouseUp = () => {
 		setCurrentTool('select');
 	}
 	path = undefined;
+	refreshLayers();
 };
 
 export default tool;
